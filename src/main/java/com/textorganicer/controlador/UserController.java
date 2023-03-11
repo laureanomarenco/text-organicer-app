@@ -12,14 +12,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private List<User> users;
-
-    public void UserController(Collection<User> users) {
-        this.users = new ArrayList<>(Arrays
-                .asList(
-//                        new User(1, "Laureano", "url")
-                ));
-    }
 
     private final UserServiceImpl service;
 
@@ -32,6 +24,7 @@ public class UserController {
         Map<String, Object> res = new HashMap<>();
 
         List<User> all;
+
         try {
             all = this.service.getAll();
         } catch (RuntimeException ex) {
@@ -47,25 +40,60 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable String id){
-        return this.users.stream()
-                .filter(user -> user.getId().equals(id) )
-                .findFirst()
-                .orElse(new User());
+    public ResponseEntity<?> getUserById(@PathVariable Integer id){
+        Map<String, Object> res = new HashMap<>();
+
+        Optional<User> user;
+
+        try {
+            user = this.service.findById(id);
+            if(!user.isPresent()) {
+                throw new RuntimeException("No hay ningún usuario con ese id");
+            }
+
+        } catch (RuntimeException ex) {
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", user);
+
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/username")
-    public User getUserByUsername(@RequestParam String username) {
-        return this.users.stream()
-                .filter(user -> user.getUsername().equals(username) )
-                .findFirst()
-                .orElse(new User());
+    public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
+        Map<String, Object> res = new HashMap<>();
+
+        Optional<User> user;
+
+        try {
+            user = this.service.findByUsername(username);
+            if(!user.isPresent()) {
+                throw new RuntimeException("No hay ningún usuario con ese username");
+            }
+        } catch (RuntimeException ex) {
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", user);
+
+        return ResponseEntity.ok(res);
     }
 
     @PostMapping
     public ResponseEntity<?> newUser(@RequestBody User user) {
-
         Map<String, Object> res = new HashMap<>();
+
         User newUser;
 
         try {
@@ -88,9 +116,56 @@ public class UserController {
         return ResponseEntity.ok(res);
     }
 
-    private Optional<User> existsUser(String username) {
-        return this.users.stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findAny();
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Integer id,@RequestBody User user) {
+        Map<String, Object> res = new HashMap<>();
+
+        try {
+            Optional<User> userToUpdate = this.service.findById(id);
+            if(!userToUpdate.isPresent()) {
+                throw new RuntimeException("El usuario no existe");
+            }
+
+            this.service.save(user);
+
+        } catch (RuntimeException ex){
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", user);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+        Map<String, Object> res = new HashMap<>();
+
+        Optional<User> user;
+
+        try {
+            user = this.service.findById(id);
+            if(!user.isPresent()) {
+                throw new RuntimeException("El usuario no existe");
+            }
+
+            this.service.delete(user.orElseThrow());
+
+        } catch (RuntimeException ex){
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+
+        return ResponseEntity.ok(res);
     }
 }

@@ -11,5 +11,5 @@ public interface UserService {
     Optional<User> findByUsername(String username);
     boolean userExists(String username);
     User save(User user);
-    User delete(Integer id);
+    void delete(User user);
 }

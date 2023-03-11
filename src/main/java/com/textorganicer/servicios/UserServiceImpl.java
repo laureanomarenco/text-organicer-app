@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User delete(Integer id) {
-        return null;
+    public void delete(User user) {
+        this.repository.delete(user);
     }
 }

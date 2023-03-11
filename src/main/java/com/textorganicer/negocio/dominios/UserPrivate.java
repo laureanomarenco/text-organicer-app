@@ -1,5 +1,7 @@
 package com.textorganicer.negocio.dominios;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class UserPrivate {
     @Id
-    private Integer user_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "mail")
     private String mail;
@@ -21,8 +24,9 @@ public class UserPrivate {
     @Column(name = "password")
     private String password;
 
+    @JsonIgnore
     @OneToOne
-    @MapsId
+    @JoinColumn(name = "user_id")
     private User user;
 
 }
