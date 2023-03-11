@@ -87,7 +87,6 @@ public class UserPrivateController {
             Optional<User> user = this.userService.findById(user_id);
             if(!user.isPresent()){
                 throw new RuntimeException("hubo un problema, no se creo bien el usuario público");
-
             }
             userPrivate.setUser(user.orElseThrow());
             newUserPrivate = this.service.save(userPrivate);
