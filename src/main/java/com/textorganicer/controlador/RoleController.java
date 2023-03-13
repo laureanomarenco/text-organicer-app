@@ -1,7 +1,7 @@
 package com.textorganicer.controlador;
 
-import com.textorganicer.negocio.dominios.Page;
-import com.textorganicer.servicios.PageServiceImpl;
+import com.textorganicer.negocio.dominios.Role;
+import com.textorganicer.servicios.RoleServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,19 +11,19 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/page")
-public class PageController {
+@RequestMapping("/role")
+public class RoleController {
 
-    private final PageServiceImpl service;
+    private final RoleServiceImpl service;
 
-    public PageController(PageServiceImpl service) {
+    public RoleController(RoleServiceImpl service) {
         this.service = service;
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllPages() {
+    public ResponseEntity<?> getAllRoles() {
         Map<String, Object> res = new HashMap<>();
-        List<Page> all;
+        List<Role> all;
 
         try {
             all = this.service.getAll();
@@ -39,15 +39,15 @@ public class PageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPageById(@PathVariable Integer id) {
+    public ResponseEntity<?> getRoleById(@PathVariable Integer id) {
         Map<String, Object> res = new HashMap<>();
 
-        Optional<Page> page;
+        Optional<Role> role;
 
         try {
-            page = this.service.findById(id);
-            if (!page.isPresent()) {
-                throw new RuntimeException("No hay ninguna página con ese id");
+            role = this.service.findById(id);
+            if (!role.isPresent()) {
+                throw new RuntimeException("No hay ningún rol con ese id");
             }
 
         } catch (RuntimeException ex) {
@@ -58,20 +58,19 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", page);
+        res.put("data", role);
 
         return ResponseEntity.ok(res);
     }
 
-    //#TODO Agregar relación con carpeta correspondiente
     @PostMapping
-    public ResponseEntity<?> newPage(@RequestBody Page page) {
+    public ResponseEntity<?> newRole(@RequestBody Role role) {
         Map<String, Object> res = new HashMap<>();
 
-        Page newPage;
+        Role newRole;
 
         try {
-            newPage = this.service.save(page);
+            newRole = this.service.save(role);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -81,21 +80,21 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", newPage);
+        res.put("data", newRole);
         return ResponseEntity.ok(res);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePage(@PathVariable Integer id, @RequestBody Page page) {
+    public ResponseEntity<?> updateRole(@PathVariable Integer id, @RequestBody Role role) {
         Map<String, Object> res = new HashMap<>();
 
         try {
-            Optional<Page> pageToUpdate = this.service.findById(id);
-            if (!pageToUpdate.isPresent()) {
-                throw new RuntimeException("La página no existe");
+            Optional<Role> roleToUpdate = this.service.findById(id);
+            if (!roleToUpdate.isPresent()) {
+                throw new RuntimeException("El rol no existe");
             }
 
-            this.service.save(page);
+            this.service.save(role);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -105,24 +104,24 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", page);
+        res.put("data", role);
 
         return ResponseEntity.ok(res);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePage(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteRole(@PathVariable Integer id) {
         Map<String, Object> res = new HashMap<>();
 
-        Optional<Page> page;
+        Optional<Role> role;
 
         try {
-            page = this.service.findById(id);
-            if (!page.isPresent()) {
-                throw new RuntimeException("La página no existe");
+            role = this.service.findById(id);
+            if (!role.isPresent()) {
+                throw new RuntimeException("El rol no existe");
             }
 
-            this.service.delete(page.orElseThrow());
+            this.service.delete(role.orElseThrow());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);

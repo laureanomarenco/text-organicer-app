@@ -73,7 +73,6 @@ public class UserPrivateController {
         return ResponseEntity.ok(res);
     }
 
-
     @PostMapping("/{user_id}")
     public ResponseEntity<?> newUserPrivate(@RequestBody UserPrivate userPrivate, @PathVariable Integer user_id) {
         Map<String, Object> res = new HashMap<>();
