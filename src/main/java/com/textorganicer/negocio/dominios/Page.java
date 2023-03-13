@@ -1,5 +1,6 @@
 package com.textorganicer.negocio.dominios;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class Page {
     private String firma;
     private String contenido;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_folder")
     private Folder folder;

@@ -1,7 +1,9 @@
 package com.textorganicer.controlador;
 
+import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Page;
-import com.textorganicer.servicios.PageServiceImpl;
+import com.textorganicer.servicios.FolderService;
+import com.textorganicer.servicios.PageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +16,12 @@ import java.util.Optional;
 @RequestMapping("/page")
 public class PageController {
 
-    private final PageServiceImpl service;
+    private final PageService service;
+    private final FolderService folderService;
 
-    public PageController(PageServiceImpl service) {
+    public PageController(PageService service, FolderService folderService) {
         this.service = service;
+        this.folderService = folderService;
     }
 
     @GetMapping
@@ -63,14 +67,18 @@ public class PageController {
         return ResponseEntity.ok(res);
     }
 
-    //#TODO Agregar relación con carpeta correspondiente
-    @PostMapping
-    public ResponseEntity<?> newPage(@RequestBody Page page) {
+    @PostMapping("/{id_folder}")
+    public ResponseEntity<?> newPage(@RequestBody Page page, @PathVariable Integer id_folder) {
         Map<String, Object> res = new HashMap<>();
 
         Page newPage;
 
         try {
+            Optional<Folder> folder = this.folderService.findById(id_folder);
+            if(!folder.isPresent()){
+                throw new RuntimeException("hubo un problema, no se encontró la carpeta");
+            }
+            page.setFolder(folder.orElseThrow());
             newPage = this.service.save(page);
 
         } catch (RuntimeException ex) {

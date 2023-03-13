@@ -1,21 +1,20 @@
 package com.textorganicer.controlador;
 
 import com.textorganicer.negocio.dominios.User;
-import com.textorganicer.servicios.UserServiceImpl;
+import com.textorganicer.servicios.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-//@CrossOrigin("http://localhost:4200")
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
-    private final UserServiceImpl service;
+    private final UserService service;
 
-    public UserController(UserServiceImpl service) {
+    public UserController(UserService service) {
         this.service = service;
     }
 

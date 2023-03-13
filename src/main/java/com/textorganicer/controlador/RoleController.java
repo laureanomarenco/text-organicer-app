@@ -1,7 +1,11 @@
 package com.textorganicer.controlador;
 
+import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Role;
-import com.textorganicer.servicios.RoleServiceImpl;
+import com.textorganicer.negocio.dominios.User;
+import com.textorganicer.servicios.FolderService;
+import com.textorganicer.servicios.RoleService;
+import com.textorganicer.servicios.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +18,14 @@ import java.util.Optional;
 @RequestMapping("/role")
 public class RoleController {
 
-    private final RoleServiceImpl service;
+    private final RoleService service;
+    private final UserService userService;
+    private final FolderService folderService;
 
-    public RoleController(RoleServiceImpl service) {
+    public RoleController(RoleService service, UserService userService, FolderService folderService) {
         this.service = service;
+        this.userService = userService;
+        this.folderService = folderService;
     }
 
     @GetMapping
@@ -64,12 +72,24 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<?> newRole(@RequestBody Role role) {
+    public ResponseEntity<?> newRole(@RequestBody Role role,
+                                     @RequestParam Integer id_user,
+                                     @RequestParam Integer id_folder) {
         Map<String, Object> res = new HashMap<>();
 
-        Role newRole;
+        Role newRole = new Role();
 
         try {
+            Optional<User> user = this.userService.findById(id_user);
+            Optional<Folder> folder = this.folderService.findById(id_folder);
+
+            if(!user.isPresent()) throw new RuntimeException("El usuario pasado no existe");
+
+            if(!folder.isPresent()) throw new RuntimeException("La carpeta pasada no existe");
+
+            role.setUser(user.orElseThrow());
+            role.setFolder(folder.orElseThrow());
+
             newRole = this.service.save(role);
 
         } catch (RuntimeException ex) {
@@ -84,6 +104,7 @@ public class RoleController {
         return ResponseEntity.ok(res);
     }
 
+    //#TODO fix
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRole(@PathVariable Integer id, @RequestBody Role role) {
         Map<String, Object> res = new HashMap<>();

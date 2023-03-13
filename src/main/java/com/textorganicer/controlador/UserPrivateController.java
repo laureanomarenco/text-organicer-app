@@ -3,8 +3,8 @@ package com.textorganicer.controlador;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 
-import com.textorganicer.servicios.UserPrivateServiceImpl;
-import com.textorganicer.servicios.UserServiceImpl;
+import com.textorganicer.servicios.UserPrivateService;
+import com.textorganicer.servicios.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +19,10 @@ import java.util.Optional;
 @RequestMapping("/user_private")
 public class UserPrivateController {
 
-    private final UserPrivateServiceImpl service;
-    private final UserServiceImpl userService;
+    private final UserPrivateService service;
+    private final UserService userService;
 
-    public UserPrivateController(UserPrivateServiceImpl service, UserServiceImpl userService) {
+    public UserPrivateController(UserPrivateService service, UserService userService) {
         this.service = service;
         this.userService = userService;
     }
@@ -153,6 +153,37 @@ public class UserPrivateController {
 
         res.put("success", Boolean.TRUE);
 
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserPrivate userPrivate) {
+        Map<String, Object> res = new HashMap<>();
+
+        User validatedUser;
+
+        try {
+            Optional<UserPrivate> userToValidate = this.service.findByMail(userPrivate.getMail());
+            if(!userToValidate.isPresent()) throw new RuntimeException("Mail incorrecto o usuario inexistente");
+
+            boolean isValid = this.service.validate(userPrivate, userToValidate);
+
+            if(!isValid) throw new RuntimeException("Mail incorrecto o usuario inexistente");
+            else {
+                validatedUser = userToValidate.orElseThrow().getUser();
+            }
+
+
+        } catch (RuntimeException ex){
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", validatedUser);
         return ResponseEntity.ok(res);
     }
 

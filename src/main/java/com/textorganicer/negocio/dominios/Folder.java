@@ -1,5 +1,6 @@
 package com.textorganicer.negocio.dominios;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,11 +22,16 @@ public class Folder {
     @Column(name = "is_public")
     private Boolean is_public;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private User user;
 
     @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Page> pages;
+
+
+    @OneToMany(mappedBy = "folder",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Role> roles;
 
 }

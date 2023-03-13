@@ -1,7 +1,9 @@
 package com.textorganicer.controlador;
 
 import com.textorganicer.negocio.dominios.Folder;
-import com.textorganicer.servicios.FolderServiceImpl;
+import com.textorganicer.negocio.dominios.User;
+import com.textorganicer.servicios.FolderService;
+import com.textorganicer.servicios.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +16,14 @@ import java.util.Optional;
 @RequestMapping("/folder")
 public class FolderController {
 
-    private final FolderServiceImpl service;
+    private final FolderService service;
+    private final UserService userService;
 
-    public FolderController(FolderServiceImpl service) {
+    public FolderController(FolderService service, UserService userService) {
         this.service = service;
+        this.userService = userService;
     }
-
+    //#TODO agregar dto porque rompe
     @GetMapping
     public ResponseEntity<?> getAllFolders() {
         Map<String, Object> res = new HashMap<>();
@@ -65,14 +69,20 @@ public class FolderController {
         return ResponseEntity.ok(res);
     }
 
-    @PostMapping
-    public ResponseEntity<?> newFolder(@RequestBody Folder folder) {
+    @PostMapping("/{id_user}")
+    public ResponseEntity<?> newFolder(@RequestBody Folder folder, @PathVariable Integer id_user) {
         Map<String, Object> res = new HashMap<>();
 
         Folder newFolder;
 
         try {
             //#TODO tiene sentido evitar que se creen repetidas?
+            Optional<User> user = this.userService.findById(id_user);
+
+            if(!user.isPresent()){
+                throw new RuntimeException("hubo un problema, no se encontró el usuario");
+            }
+            folder.setUser(user.orElseThrow());
             newFolder = this.service.save(folder);
 
         } catch (RuntimeException ex){

@@ -12,4 +12,5 @@ public interface UserPrivateService {
     Optional<UserPrivate> findByMail(String mail);
     UserPrivate save(UserPrivate userPrivate);
     void delete(UserPrivate userPrivate);
+    boolean validate(UserPrivate userToValidate, Optional<UserPrivate> userInDB);
 }
