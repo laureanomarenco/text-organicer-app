@@ -2,6 +2,8 @@ package com.textorganicer.controlador;
 
 import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Page;
+import com.textorganicer.negocio.dto.PageDTO;
+import com.textorganicer.negocio.dto.mapper.PageMapper;
 import com.textorganicer.servicios.FolderService;
 import com.textorganicer.servicios.PageService;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/page")
 public class PageController {
-
     private final PageService service;
     private final FolderService folderService;
+
 
     public PageController(PageService service, FolderService folderService) {
         this.service = service;
@@ -27,10 +30,16 @@ public class PageController {
     @GetMapping
     public ResponseEntity<?> getAllPages() {
         Map<String, Object> res = new HashMap<>();
-        List<Page> all;
+
+        List<PageDTO> allDTO;
 
         try {
-            all = this.service.getAll();
+            List<Page> all = this.service.getAll();
+
+            allDTO = all.stream()
+                    .map(PageMapper::entityToDto)
+                    .collect(Collectors.toList());
+
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
@@ -38,7 +47,7 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", all);
+        res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
 
@@ -46,13 +55,15 @@ public class PageController {
     public ResponseEntity<?> getPageById(@PathVariable Integer id) {
         Map<String, Object> res = new HashMap<>();
 
-        Optional<Page> page;
+         PageDTO pageDTO;
 
         try {
-            page = this.service.findById(id);
+            Optional<Page> page = this.service.findById(id);
             if (!page.isPresent()) {
                 throw new RuntimeException("No hay ninguna página con ese id");
             }
+
+            pageDTO = PageMapper.entityToDto(page.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -62,7 +73,7 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", page);
+        res.put("data", pageDTO);
 
         return ResponseEntity.ok(res);
     }
@@ -71,7 +82,7 @@ public class PageController {
     public ResponseEntity<?> newPage(@RequestBody Page page, @PathVariable Integer id_folder) {
         Map<String, Object> res = new HashMap<>();
 
-        Page newPage;
+        PageDTO newPageDTO;
 
         try {
             Optional<Folder> folder = this.folderService.findById(id_folder);
@@ -79,7 +90,9 @@ public class PageController {
                 throw new RuntimeException("hubo un problema, no se encontró la carpeta");
             }
             page.setFolder(folder.orElseThrow());
-            newPage = this.service.save(page);
+            Page newPage = this.service.save(page);
+
+            newPageDTO = PageMapper.entityToDto(newPage);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -89,7 +102,7 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", newPage);
+        res.put("data", newPageDTO);
         return ResponseEntity.ok(res);
     }
 
@@ -97,13 +110,15 @@ public class PageController {
     public ResponseEntity<?> updatePage(@PathVariable Integer id, @RequestBody Page page) {
         Map<String, Object> res = new HashMap<>();
 
+        PageDTO pageDTO;
+
         try {
             Optional<Page> pageToUpdate = this.service.findById(id);
-            if (!pageToUpdate.isPresent()) {
-                throw new RuntimeException("La página no existe");
-            }
+            if (!pageToUpdate.isPresent()) throw new RuntimeException("La página no existe");
 
-            this.service.save(page);
+            page.setFolder(pageToUpdate.get().getFolder());
+            Page updated = this.service.save(page);
+            pageDTO = PageMapper.entityToDto(updated);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -113,7 +128,7 @@ public class PageController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", page);
+        res.put("data", pageDTO);
 
         return ResponseEntity.ok(res);
     }

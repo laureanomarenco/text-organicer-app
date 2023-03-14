@@ -2,7 +2,10 @@ package com.textorganicer.controlador;
 
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
-
+import com.textorganicer.negocio.dto.UserDTO;
+import com.textorganicer.negocio.dto.UserPrivateDTO;
+import com.textorganicer.negocio.dto.mapper.UserMapper;
+import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
 import com.textorganicer.servicios.UserPrivateService;
 import com.textorganicer.servicios.UserService;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin("*")
 @RestController
@@ -31,10 +35,15 @@ public class UserPrivateController {
     public ResponseEntity<?> getAllUsersPrivate() {
         Map<String, Object> res = new HashMap<>();
 
-        List<UserPrivate> all;
+        List<UserPrivateDTO> allDTO;
 
         try {
-            all = this.service.getAll();
+            List<UserPrivate> all = this.service.getAll();
+
+            allDTO = all.stream()
+                    .map(UserPrivateMapper::entityToDto)
+                    .collect(Collectors.toList());
+
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
@@ -43,7 +52,7 @@ public class UserPrivateController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", all);
+        res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
 
@@ -51,13 +60,14 @@ public class UserPrivateController {
     public ResponseEntity<?> getUserPrivateById(@PathVariable Integer id){
         Map<String, Object> res = new HashMap<>();
 
-        Optional<UserPrivate> userPrivate;
+        UserPrivateDTO userPrivateDTO;
 
         try {
-            userPrivate = this.service.findById(id);
-            if(!userPrivate.isPresent()) {
-                throw new RuntimeException("No hay ningún usuario con ese id");
-            }
+            Optional<UserPrivate> userPrivate = this.service.findById(id);
+
+            if(!userPrivate.isPresent()) throw new RuntimeException("No hay ningún usuario con ese id");
+
+            userPrivateDTO = UserPrivateMapper.entityToDto(userPrivate.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -68,27 +78,28 @@ public class UserPrivateController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", userPrivate);
+        res.put("data", userPrivateDTO);
 
         return ResponseEntity.ok(res);
     }
 
     @PostMapping("/{user_id}")
-    public ResponseEntity<?> newUserPrivate(@RequestBody UserPrivate userPrivate, @PathVariable Integer user_id) {
+    public ResponseEntity<?> newUserPrivate(@RequestBody UserPrivate userPrivate,
+                                            @PathVariable Integer user_id) {
         Map<String, Object> res = new HashMap<>();
 
-        UserPrivate newUserPrivate;
+        UserPrivateDTO newUserPrivateDTO;
 
         try {
-            if(this.service.findByMail(userPrivate.getMail()).isPresent()) {
-                throw new RuntimeException("El username ya existe");
-            }
+            if(this.service.findByMail(userPrivate.getMail()).isPresent()) throw new RuntimeException("El username ya existe");
+
             Optional<User> user = this.userService.findById(user_id);
-            if(!user.isPresent()){
-                throw new RuntimeException("hubo un problema, no se creo bien el usuario público");
-            }
+
+            if(!user.isPresent()) throw new RuntimeException("hubo un problema, no se creo bien el usuario público");
+
             userPrivate.setUser(user.orElseThrow());
-            newUserPrivate = this.service.save(userPrivate);
+            UserPrivate newUserPrivate = this.service.save(userPrivate);
+            newUserPrivateDTO = UserPrivateMapper.entityToDto(newUserPrivate);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);
@@ -99,21 +110,26 @@ public class UserPrivateController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", newUserPrivate);
+        res.put("data", newUserPrivateDTO);
         return ResponseEntity.ok(res);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUserPrivate(@PathVariable Integer id,@RequestBody UserPrivate userPrivate) {
+    public ResponseEntity<?> updateUserPrivate(@PathVariable Integer id,
+                                               @RequestBody UserPrivate userPrivate) {
+
         Map<String, Object> res = new HashMap<>();
 
+        UserPrivateDTO updatedDTO;
         try {
             Optional<UserPrivate> userToUpdate = this.service.findById(id);
-            if(!userToUpdate.isPresent()) {
-                throw new RuntimeException("El usuario no existe");
-            }
 
-            this.service.save(userPrivate);
+            if(!userToUpdate.isPresent()) throw new RuntimeException("El usuario no existe");
+
+            userPrivate.setUser(userToUpdate.get().getUser());
+            UserPrivate updated = this.service.save(userPrivate);
+
+            updatedDTO = UserPrivateMapper.entityToDto(updated);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);
@@ -124,7 +140,7 @@ public class UserPrivateController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", userPrivate);
+        res.put("data", updatedDTO);
 
         return ResponseEntity.ok(res);
     }
@@ -160,7 +176,7 @@ public class UserPrivateController {
     public ResponseEntity<?> login(@RequestBody UserPrivate userPrivate) {
         Map<String, Object> res = new HashMap<>();
 
-        User validatedUser;
+        UserDTO validatedUserDTO;
 
         try {
             Optional<UserPrivate> userToValidate = this.service.findByMail(userPrivate.getMail());
@@ -168,10 +184,11 @@ public class UserPrivateController {
 
             boolean isValid = this.service.validate(userPrivate, userToValidate);
 
+            User validatedUser;
             if(!isValid) throw new RuntimeException("Mail incorrecto o usuario inexistente");
-            else {
-                validatedUser = userToValidate.orElseThrow().getUser();
-            }
+            else validatedUser = userToValidate.orElseThrow().getUser();
+
+            validatedUserDTO = UserMapper.entityToDto(validatedUser);
 
 
         } catch (RuntimeException ex){
@@ -183,7 +200,7 @@ public class UserPrivateController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", validatedUser);
+        res.put("data", validatedUserDTO);
         return ResponseEntity.ok(res);
     }
 

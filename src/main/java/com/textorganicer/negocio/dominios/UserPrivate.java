@@ -24,7 +24,6 @@ public class UserPrivate {
     @Column(name = "password")
     private String password;
 
-    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;

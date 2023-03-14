@@ -21,7 +21,6 @@ public class Page {
     private String firma;
     private String contenido;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_folder")
     private Folder folder;

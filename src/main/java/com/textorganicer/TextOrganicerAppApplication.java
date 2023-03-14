@@ -13,6 +13,6 @@ public class TextOrganicerAppApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("Bienvenido a textOrganicer API REST");
+        System.out.println("\n---------        Bienvenido a la API de textOrganicer       ---------\n\n          DOC: http://localhost:8080/swagger-ui/#/\n");
     }
 }

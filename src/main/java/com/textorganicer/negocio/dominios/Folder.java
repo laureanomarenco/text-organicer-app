@@ -22,7 +22,6 @@ public class Folder {
     @Column(name = "is_public")
     private Boolean is_public;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private User user;

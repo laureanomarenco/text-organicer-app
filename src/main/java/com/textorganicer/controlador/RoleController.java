@@ -3,6 +3,8 @@ package com.textorganicer.controlador;
 import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Role;
 import com.textorganicer.negocio.dominios.User;
+import com.textorganicer.negocio.dto.RoleDTO;
+import com.textorganicer.negocio.dto.mapper.RoleMapper;
 import com.textorganicer.servicios.FolderService;
 import com.textorganicer.servicios.RoleService;
 import com.textorganicer.servicios.UserService;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/role")
@@ -31,10 +34,14 @@ public class RoleController {
     @GetMapping
     public ResponseEntity<?> getAllRoles() {
         Map<String, Object> res = new HashMap<>();
-        List<Role> all;
+         List<RoleDTO> allDTO;
 
         try {
-            all = this.service.getAll();
+            List<Role> all = this.service.getAll();
+            allDTO = all.stream()
+                    .map(RoleMapper::entityToDto)
+                    .collect(Collectors.toList());
+
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
@@ -42,7 +49,7 @@ public class RoleController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", all);
+        res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
 
@@ -50,13 +57,14 @@ public class RoleController {
     public ResponseEntity<?> getRoleById(@PathVariable Integer id) {
         Map<String, Object> res = new HashMap<>();
 
-        Optional<Role> role;
+        RoleDTO roleDTO;
 
         try {
-            role = this.service.findById(id);
+            Optional<Role> role = this.service.findById(id);
             if (!role.isPresent()) {
                 throw new RuntimeException("No hay ningún rol con ese id");
             }
+            roleDTO = RoleMapper.entityToDto(role.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -66,7 +74,7 @@ public class RoleController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", role);
+        res.put("data", roleDTO);
 
         return ResponseEntity.ok(res);
     }
@@ -77,7 +85,7 @@ public class RoleController {
                                      @RequestParam Integer id_folder) {
         Map<String, Object> res = new HashMap<>();
 
-        Role newRole = new Role();
+        RoleDTO newRoleDTO;
 
         try {
             Optional<User> user = this.userService.findById(id_user);
@@ -90,7 +98,8 @@ public class RoleController {
             role.setUser(user.orElseThrow());
             role.setFolder(folder.orElseThrow());
 
-            newRole = this.service.save(role);
+            Role newRole = this.service.save(role);
+            newRoleDTO = RoleMapper.entityToDto(newRole);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -100,22 +109,24 @@ public class RoleController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", newRole);
+        res.put("data", newRoleDTO);
         return ResponseEntity.ok(res);
     }
 
-    //#TODO fix
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRole(@PathVariable Integer id, @RequestBody Role role) {
         Map<String, Object> res = new HashMap<>();
 
+        RoleDTO roleDTO;
+
         try {
             Optional<Role> roleToUpdate = this.service.findById(id);
-            if (!roleToUpdate.isPresent()) {
-                throw new RuntimeException("El rol no existe");
-            }
+            if (!roleToUpdate.isPresent()) throw new RuntimeException("El rol no existe");
 
-            this.service.save(role);
+            role.setUser(roleToUpdate.get().getUser());
+            role.setFolder(roleToUpdate.get().getFolder());
+            Role updated = this.service.save(role);
+            roleDTO = RoleMapper.entityToDto(updated);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -125,7 +136,7 @@ public class RoleController {
         }
 
         res.put("success", Boolean.TRUE);
-        res.put("data", role);
+        res.put("data", roleDTO);
 
         return ResponseEntity.ok(res);
     }
