@@ -27,6 +27,11 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
+    public Optional<List<Page>> getAllByFolder(Integer idFolder) {
+        return this.repository.getAllByFolder(idFolder);
+    }
+
+    @Override
     public Page save(Page page) {
         return this.repository.save(page);
     }

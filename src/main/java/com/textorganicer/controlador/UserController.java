@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@CrossOrigin("*")
+@CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/user")
 @Slf4j

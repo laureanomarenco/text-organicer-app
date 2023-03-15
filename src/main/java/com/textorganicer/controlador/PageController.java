@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/page")
 public class PageController {
@@ -75,6 +76,31 @@ public class PageController {
         res.put("success", Boolean.TRUE);
         res.put("data", pageDTO);
 
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("byFolder/{id_folder}")
+    public ResponseEntity<?> getAllPages(@PathVariable Integer id_folder) {
+        Map<String, Object> res = new HashMap<>();
+
+        List<PageDTO> allDTO;
+
+        try {
+            Optional<List<Page>> all = this.service.getAllByFolder(id_folder);
+            if(!all.isPresent()) throw new RuntimeException("No hay páginas en esta carpeta");
+
+            allDTO = all.get().stream()
+                    .map(PageMapper::entityToDto)
+                    .collect(Collectors.toList());
+
+        } catch (RuntimeException ex) {
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+            return ResponseEntity.badRequest().body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
 

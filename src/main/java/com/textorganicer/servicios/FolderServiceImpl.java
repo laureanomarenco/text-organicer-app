@@ -27,6 +27,11 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    public Optional<List<Folder>> getAllByUser(Integer idUser) {
+        return this.repository.getAllByUser(idUser);
+    }
+
+    @Override
     public Folder save(Folder folder) {
         return this.repository.save(folder);
     }

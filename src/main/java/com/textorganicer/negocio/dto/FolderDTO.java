@@ -13,6 +13,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 public class FolderDTO {
     private Integer id;
     private String nombre;
-    private Boolean is_public;
+    private String is_public;
     private Integer id_user;
 }

@@ -1,6 +1,5 @@
 package com.textorganicer.negocio.dominios;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,7 @@ public class Page {
     private String titulo;
     private String subtitulo;
     private String firma;
+    @Lob
     private String contenido;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -6,6 +6,7 @@ import com.textorganicer.negocio.dto.FolderDTO;
 import com.textorganicer.negocio.dto.mapper.FolderMapper;
 import com.textorganicer.servicios.FolderService;
 import com.textorganicer.servicios.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/folder")
 public class FolderController {
@@ -30,6 +32,7 @@ public class FolderController {
     @GetMapping
     public ResponseEntity<?> getAllFolders() {
         Map<String, Object> res = new HashMap<>();
+
         List<FolderDTO> allDTO;
 
         try {
@@ -77,6 +80,32 @@ public class FolderController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("byUser/{id_user}")
+    public ResponseEntity<?> getAllFolders(@PathVariable Integer id_user) {
+        Map<String, Object> res = new HashMap<>();
+
+        List<FolderDTO> allDTO;
+
+        try {
+            Optional<List<Folder>> all = this.service.getAllByUser(id_user);
+            if(!all.isPresent()) throw new RuntimeException("Este usuario no tiene carpetas");
+
+            allDTO = all.get().stream()
+                    .map(FolderMapper::entityToDto)
+                    .collect(Collectors.toList());
+
+        } catch (RuntimeException ex) {
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", allDTO);
+        return ResponseEntity.ok(res);
+    }
+
     @PostMapping("/{id_user}")
     public ResponseEntity<?> newFolder(@RequestBody Folder folder, @PathVariable Integer id_user) {
         Map<String, Object> res = new HashMap<>();
@@ -94,7 +123,7 @@ public class FolderController {
             Folder newFolder = this.service.save(folder);
 
             folderDTO = FolderMapper.entityToDto(newFolder);
-        } catch (RuntimeException ex){
+        } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
 
@@ -104,6 +133,7 @@ public class FolderController {
 
         res.put("success", Boolean.TRUE);
         res.put("data", folderDTO);
+        res.put("status", HttpStatus.CREATED);
         return ResponseEntity.ok(res);
     }
 

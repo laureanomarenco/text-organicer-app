@@ -20,13 +20,13 @@ public class Folder {
     @Column(name = "nombre")
     private String nombre;
     @Column(name = "is_public")
-    private Boolean is_public;
+    private String is_public;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private User user;
 
-    @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "folder", orphanRemoval = true)
     private List<Page> pages;
 
 

@@ -27,6 +27,21 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Optional<List<Role>> getAllByFolderId(Integer id_folder) {
+        return this.repository.getAllByFolderId(id_folder);
+    }
+
+    @Override
+    public Optional<List<Role>> findShared(Integer idUser) {
+        return this.repository.findShared(idUser);
+    }
+
+    @Override
+    public Optional<Role> findByUserAndFolder(Integer idUser, Integer idFolder) {
+        return this.repository.findByIdAndFolder(idUser, idFolder);
+    }
+
+    @Override
     public Role save(Role role) {
         return this.repository.save(role);
     }

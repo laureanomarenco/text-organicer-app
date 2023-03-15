@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+//#TODO hacer recorrida general agregando comentarios, logs, y httpStatus.
 @SpringBootApplication
 public class TextOrganicerAppApplication implements CommandLineRunner {
 

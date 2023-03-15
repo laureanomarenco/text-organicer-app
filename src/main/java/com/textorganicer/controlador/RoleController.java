@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/role")
 public class RoleController {
@@ -64,6 +65,86 @@ public class RoleController {
             if (!role.isPresent()) {
                 throw new RuntimeException("No hay ningún rol con ese id");
             }
+            roleDTO = RoleMapper.entityToDto(role.get());
+
+        } catch (RuntimeException ex) {
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest().body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", roleDTO);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/byUser/{id_user}")
+    public ResponseEntity<?> getAllByUserId(@PathVariable Integer id_user) {
+        Map<String, Object> res = new HashMap<>();
+
+        List<RoleDTO> allDTO;
+
+        try {
+            Optional<List<Role>> roles = this.service.findShared(id_user);
+            if (!roles.isPresent()) throw new RuntimeException("Ese usuario no tiene roles");
+
+            allDTO = roles.get().stream()
+                    .map(RoleMapper::entityToDto)
+                    .collect(Collectors.toList());
+
+        } catch (RuntimeException ex) {
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest().body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", allDTO);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/byFolder/{id_folder}")
+    public ResponseEntity<?> getAllByFolderId(@PathVariable Integer id_folder) {
+        Map<String, Object> res = new HashMap<>();
+
+        List<RoleDTO> allDTO;
+
+        try {
+            Optional<List<Role>> roles = this.service.getAllByFolderId(id_folder);
+            if (!roles.isPresent()) throw new RuntimeException("Esta carpeta no tiene roles");
+
+            allDTO = roles.get().stream()
+                    .map(RoleMapper::entityToDto)
+                    .collect(Collectors.toList());
+
+        } catch (RuntimeException ex) {
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest().body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", allDTO);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/byUserAndFolder")
+    public ResponseEntity<?> getAllByUserId(@RequestParam Integer id_user,
+                                            @RequestParam Integer id_folder) {
+        Map<String, Object> res = new HashMap<>();
+
+        RoleDTO roleDTO;
+
+        try {
+            Optional<Role> role = this.service.findByUserAndFolder(id_user, id_folder);
+            if (!role.isPresent()) throw new RuntimeException("No hay roles");
+
             roleDTO = RoleMapper.entityToDto(role.get());
 
         } catch (RuntimeException ex) {
@@ -166,5 +247,7 @@ public class RoleController {
 
         return ResponseEntity.ok(res);
     }
+
+    //'role?id_user=' + id_user + '&id_folder=' + id_folder
 
 }

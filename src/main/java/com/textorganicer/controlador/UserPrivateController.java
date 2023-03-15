@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CrossOrigin("*")
+@CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/user_private")
 public class UserPrivateController {
@@ -193,7 +193,7 @@ public class UserPrivateController {
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
+            res.put("message", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
