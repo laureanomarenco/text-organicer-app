@@ -138,7 +138,7 @@ public class FolderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateFolder(@PathVariable Integer id,@RequestBody Folder folder) {
+    public ResponseEntity<?> updateFolder(@PathVariable Integer id, @RequestBody Folder folder) {
         Map<String, Object> res = new HashMap<>();
 
         FolderDTO folderDTO;
