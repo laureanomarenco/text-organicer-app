@@ -1,4 +1,5 @@
 package com.textorganicer.datos;
 
-public class DatosDummy {
-}
+import com.textorganicer.negocio.dominios.User;
+
+public class DatosDummy {}

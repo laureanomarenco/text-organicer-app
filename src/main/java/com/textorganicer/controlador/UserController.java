@@ -62,6 +62,7 @@ public class UserController {
                 throw new RuntimeException("No hay ningún usuario con ese id");
             }
             userDTO = UserMapper.entityToDto(user.orElseThrow());
+        log.info("get a usuarios");
 
         } catch (RuntimeException ex) {
             res.put("sucess", Boolean.FALSE);
