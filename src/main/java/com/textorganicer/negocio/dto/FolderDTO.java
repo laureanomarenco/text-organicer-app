@@ -1,11 +1,11 @@
 package com.textorganicer.negocio.dto;
 
-import com.textorganicer.negocio.dominios.User;
+import com.textorganicer.negocio.dominios.Page;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.criteria.CriteriaBuilder;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,4 +15,5 @@ public class FolderDTO {
     private String nombre;
     private String is_public;
     private Integer id_user;
+    private List<Page> page;
 }
