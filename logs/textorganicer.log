@@ -68,3 +68,31 @@
 18/mar./2023 05:45:45 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [SpringApplicationShutdownHook] Closing JPA EntityManagerFactory for persistence unit 'default'
 18/mar./2023 05:45:45 INFO com.zaxxer.hikari.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown initiated...
 18/mar./2023 05:45:45 INFO com.zaxxer.hikari.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown completed.
+18/mar./2023 05:45:51 INFO org.hibernate.validator.internal.util.Version [background-preinit] HV000001: Hibernate Validator 6.2.5.Final
+18/mar./2023 05:45:51 INFO org.springframework.boot.StartupInfoLogger [main] Starting TextOrganicerAppApplication using Java 11.0.18 on NBOOT36 with PID 2680 (C:\Users\lmarenco\text-organicer-app\target\classes started by lmarenco in C:\Users\lmarenco\text-organicer-app)
+18/mar./2023 05:45:51 INFO org.springframework.boot.SpringApplication [main] No active profile set, falling back to 1 default profile: "default"
+18/mar./2023 05:45:52 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+18/mar./2023 05:45:52 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 65 ms. Found 5 JPA repository interfaces.
+18/mar./2023 05:45:52 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat initialized with port(s): 8081 (http)
+18/mar./2023 05:45:52 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8081"]
+18/mar./2023 05:45:52 INFO org.apache.juli.logging.DirectJDKLog [main] Starting service [Tomcat]
+18/mar./2023 05:45:52 INFO org.apache.juli.logging.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/9.0.71]
+18/mar./2023 05:45:52 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+18/mar./2023 05:45:52 INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1241 ms
+18/mar./2023 05:45:52 INFO org.hibernate.jpa.internal.util.LogHelper [main] HHH000204: Processing PersistenceUnitInfo [name: default]
+18/mar./2023 05:45:52 INFO org.hibernate.Version [main] HHH000412: Hibernate ORM core version 5.6.15.Final
+18/mar./2023 05:45:52 INFO org.hibernate.annotations.common.reflection.java.JavaReflectionManager [main] HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+18/mar./2023 05:45:52 INFO com.zaxxer.hikari.HikariDataSource [main] HikariPool-1 - Starting...
+18/mar./2023 05:45:53 INFO com.zaxxer.hikari.HikariDataSource [main] HikariPool-1 - Start completed.
+18/mar./2023 05:45:53 INFO org.hibernate.dialect.Dialect [main] HHH000400: Using dialect: org.hibernate.dialect.MySQL55Dialect
+18/mar./2023 05:45:53 INFO org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator [main] HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+18/mar./2023 05:45:53 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [main] Initialized JPA EntityManagerFactory for persistence unit 'default'
+18/mar./2023 05:45:54 WARN org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration$JpaWebConfiguration [main] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+18/mar./2023 05:45:54 INFO org.apache.juli.logging.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8081"]
+18/mar./2023 05:45:54 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat started on port(s): 8081 (http) with context path ''
+18/mar./2023 05:45:54 INFO org.springframework.boot.StartupInfoLogger [main] Started TextOrganicerAppApplication in 3.354 seconds (JVM running for 4.172)
+18/mar./2023 05:46:09 INFO org.apache.juli.logging.DirectJDKLog [http-nio-8081-exec-1] Initializing Spring DispatcherServlet 'dispatcherServlet'
+18/mar./2023 05:46:09 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8081-exec-1] Initializing Servlet 'dispatcherServlet'
+18/mar./2023 05:46:09 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8081-exec-1] Completed initialization in 1 ms
+18/mar./2023 05:46:09 INFO com.textorganicer.controlador.UserController [http-nio-8081-exec-1] usuario nuevo: User(id=1, username=Laureano, imagen=null, token=f78a4c66-8ddf-476e-a642-6142775616f2, tokenExpiration=2023-03-19T03:46:09.438466700, userPrivate=null, folders=[], roles=null)
+18/mar./2023 05:47:21 INFO com.textorganicer.controlador.UserController [http-nio-8081-exec-10] usuario nuevo: User(id=2, username=Laureano, imagen=null, token=1a881fe1-34d1-4163-9a6d-d49978744a1b, tokenExpiration=2023-03-19T03:47:21.812435500, userPrivate=null, folders=[], roles=null)
