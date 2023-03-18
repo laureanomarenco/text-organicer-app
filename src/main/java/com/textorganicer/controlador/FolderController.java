@@ -24,9 +24,13 @@ public class FolderController {
     private final FolderService service;
     private final UserService userService;
 
-    public FolderController(FolderService service, UserService userService) {
+    private final FolderMapper folderMapper;
+
+
+    public FolderController(FolderService service, UserService userService, FolderMapper folderMapper) {
         this.service = service;
         this.userService = userService;
+        this.folderMapper = folderMapper;
     }
 
     @GetMapping
@@ -39,7 +43,7 @@ public class FolderController {
             List<Folder> all = this.service.getAll();
 
             allDTO = all.stream()
-                    .map(FolderMapper::entityToDto)
+                    .map(folderMapper::entityToDto)
                     .collect(Collectors.toList());
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -65,7 +69,7 @@ public class FolderController {
                 throw new RuntimeException("No hay ninguna carpeta con ese id");
             }
 
-            folderDTO = FolderMapper.entityToDto(folder.get());
+            folderDTO = folderMapper.entityToDto(folder.get());
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
@@ -91,7 +95,7 @@ public class FolderController {
             if(!all.isPresent()) throw new RuntimeException("Este usuario no tiene carpetas");
 
             allDTO = all.get().stream()
-                    .map(FolderMapper::entityToDto)
+                    .map(folderMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -122,7 +126,7 @@ public class FolderController {
             folder.setUser(user.orElseThrow());
             Folder newFolder = this.service.save(folder);
 
-            folderDTO = FolderMapper.entityToDto(newFolder);
+            folderDTO = folderMapper.entityToDto(newFolder);
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
@@ -152,7 +156,7 @@ public class FolderController {
             folder.setPages(folderToUpdate.get().getPages());
 
             Folder updated = this.service.save(folder);
-            folderDTO = FolderMapper.entityToDto(updated);
+            folderDTO = folderMapper.entityToDto(updated);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);

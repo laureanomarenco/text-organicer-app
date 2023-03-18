@@ -5,11 +5,14 @@ import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserPostDTO;
 import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.servicios.UserService;
+import com.textorganicer.utils.TokenGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,10 +22,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserController {
 
+    private UserMapper userMapper;
     private final UserService service;
 
 //    private static Logger logger = LoggerFactory.getLogger(UserController.class);
-    public UserController(UserService service) {
+    public UserController(UserMapper userMapper, UserService service) {
+        this.userMapper = userMapper;
         this.service = service;
     }
 
@@ -35,7 +40,7 @@ public class UserController {
         try {
             List<User> all = this.service.getAll();
             allDtos = all.stream()
-                    .map(UserMapper::entityToDto)
+                    .map(userMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -61,7 +66,7 @@ public class UserController {
             if(!user.isPresent()) {
                 throw new RuntimeException("No hay ningún usuario con ese id");
             }
-            userDTO = UserMapper.entityToDto(user.orElseThrow());
+            userDTO = userMapper.entityToDto(user.orElseThrow());
         log.info("get a usuarios");
 
         } catch (RuntimeException ex) {
@@ -91,7 +96,7 @@ public class UserController {
                 throw new RuntimeException("No hay ningún usuario con ese username");
             }
 
-            userDTO = UserMapper.entityToDto(user.get());
+            userDTO = userMapper.entityToDto(user.get());
 
         } catch (RuntimeException ex) {
             res.put("sucess", Boolean.FALSE);
@@ -116,9 +121,15 @@ public class UserController {
         try {
             if(this.service.userExists(user.getUsername())) throw new RuntimeException("El username ya existe");
 
+            String token = TokenGenerator.generateToken();
+            user.setToken(token);
+
+            LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
+            user.setTokenExpiration(expirationDate);
+
             User newUser = this.service.save(user);
 
-            newUserDTO = UserMapper.entityToPostDto(newUser);
+            newUserDTO = userMapper.entityToPostDto(newUser);
 
             log.info("usuario nuevo: " + newUser.toString());
         } catch (RuntimeException ex){
@@ -147,9 +158,11 @@ public class UserController {
             user.setUserPrivate(userToUpdate.get().getUserPrivate());
             user.setRoles(userToUpdate.get().getRoles());
             user.setFolders(userToUpdate.get().getFolders());
+            user.setToken(userToUpdate.get().getToken());
+            user.setTokenExpiration(userToUpdate.get().getTokenExpiration());
             User updated = this.service.save(user);
 
-            userDTO = UserMapper.entityToDto(updated);
+            userDTO = userMapper.entityToDto(updated);
 
         } catch (RuntimeException ex){
             res.put("sucess", Boolean.FALSE);
@@ -189,6 +202,35 @@ public class UserController {
 
         res.put("success", Boolean.TRUE);
 
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/validateToken/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token) {
+        Map<String, Object> res = new HashMap<>();
+
+        UserDTO newUserDTO;
+
+        try {
+            Optional<User> userToValidate = this.service.findByToken(token);
+            if(!userToValidate.isPresent()) throw new RuntimeException("Token inexistente");
+
+            LocalDateTime now = LocalDateTime.now();
+            if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new RuntimeException("Token expirado");
+
+            newUserDTO = this.userMapper.entityToDto(userToValidate.get());
+
+
+        } catch (RuntimeException ex){
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", newUserDTO);
         return ResponseEntity.ok(res);
     }
 }

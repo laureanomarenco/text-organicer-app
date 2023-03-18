@@ -1,8 +1,10 @@
-package com.textorganicer.servicios;
+package com.textorganicer.servicios.impl;
 
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.respositorios.UserPrivateRepository;
+import com.textorganicer.servicios.UserPrivateService;
+import com.textorganicer.utils.HashGenerator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,8 +41,15 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
     @Override
     public boolean validate(UserPrivate userToValidate, Optional<UserPrivate> userInDB) {
-        if(userToValidate.getMail().equals(userInDB.orElseThrow().getMail())
-                && userToValidate.getPassword().equals(userInDB.orElseThrow().getPassword())) return true;
+        System.out.println(HashGenerator.verifyPassword(
+                userToValidate.getPassword(),
+                userInDB.orElseThrow().getSalt(),
+                userInDB.orElseThrow().getPassword()));
+        if(HashGenerator.verifyPassword(
+                userToValidate.getPassword(),
+                userInDB.orElseThrow().getSalt(),
+                userInDB.orElseThrow().getPassword())) return true;
+
         else return false;
     }
 
