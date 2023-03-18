@@ -19,11 +19,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/page")
 public class PageController {
+
+    private final PageMapper pageMapper;
     private final PageService service;
     private final FolderService folderService;
 
 
-    public PageController(PageService service, FolderService folderService) {
+    public PageController(PageMapper pageMapper, PageService service, FolderService folderService) {
+        this.pageMapper = pageMapper;
         this.service = service;
         this.folderService = folderService;
     }
@@ -38,7 +41,7 @@ public class PageController {
             List<Page> all = this.service.getAll();
 
             allDTO = all.stream()
-                    .map(PageMapper::entityToDto)
+                    .map(pageMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -64,7 +67,7 @@ public class PageController {
                 throw new RuntimeException("No hay ninguna página con ese id");
             }
 
-            pageDTO = PageMapper.entityToDto(page.get());
+            pageDTO = pageMapper.entityToDto(page.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -90,7 +93,7 @@ public class PageController {
             if(!all.isPresent()) throw new RuntimeException("No hay páginas en esta carpeta");
 
             allDTO = all.get().stream()
-                    .map(PageMapper::entityToDto)
+                    .map(pageMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -118,7 +121,7 @@ public class PageController {
             page.setFolder(folder.orElseThrow());
             Page newPage = this.service.save(page);
 
-            newPageDTO = PageMapper.entityToDto(newPage);
+            newPageDTO = pageMapper.entityToDto(newPage);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -144,7 +147,7 @@ public class PageController {
 
             page.setFolder(pageToUpdate.get().getFolder());
             Page updated = this.service.save(page);
-            pageDTO = PageMapper.entityToDto(updated);
+            pageDTO = pageMapper.entityToDto(updated);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);

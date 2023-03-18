@@ -49,4 +49,9 @@ public class UserServiceImpl implements UserService {
     public void delete(User user) {
         this.repository.delete(user);
     }
+
+    @Override
+    public Optional<User> findByToken(String token) {
+        return this.repository.findByToken(token);
+    }
 }

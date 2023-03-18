@@ -24,7 +24,9 @@ public class UserPrivate {
     @Column(name = "password")
     private String password;
 
-    private String sal;
+    @Lob
+    @Column(name = "salt")
+    private byte[] salt;
 
     @OneToOne
     @JoinColumn(name = "user_id")

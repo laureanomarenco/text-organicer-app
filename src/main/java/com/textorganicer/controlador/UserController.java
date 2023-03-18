@@ -5,11 +5,14 @@ import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserPostDTO;
 import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.servicios.UserService;
+import com.textorganicer.utils.TokenGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,6 +121,12 @@ public class UserController {
         try {
             if(this.service.userExists(user.getUsername())) throw new RuntimeException("El username ya existe");
 
+            String token = TokenGenerator.generateToken();
+            user.setToken(token);
+
+            LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
+            user.setTokenExpiration(expirationDate);
+
             User newUser = this.service.save(user);
 
             newUserDTO = userMapper.entityToPostDto(newUser);
@@ -149,6 +158,8 @@ public class UserController {
             user.setUserPrivate(userToUpdate.get().getUserPrivate());
             user.setRoles(userToUpdate.get().getRoles());
             user.setFolders(userToUpdate.get().getFolders());
+            user.setToken(userToUpdate.get().getToken());
+            user.setTokenExpiration(userToUpdate.get().getTokenExpiration());
             User updated = this.service.save(user);
 
             userDTO = userMapper.entityToDto(updated);
@@ -191,6 +202,35 @@ public class UserController {
 
         res.put("success", Boolean.TRUE);
 
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/validateToken/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token) {
+        Map<String, Object> res = new HashMap<>();
+
+        UserDTO newUserDTO;
+
+        try {
+            Optional<User> userToValidate = this.service.findByToken(token);
+            if(!userToValidate.isPresent()) throw new RuntimeException("Token inexistente");
+
+            LocalDateTime now = LocalDateTime.now();
+            if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new RuntimeException("Token expirado");
+
+            newUserDTO = this.userMapper.entityToDto(userToValidate.get());
+
+
+        } catch (RuntimeException ex){
+            res.put("sucess", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        res.put("success", Boolean.TRUE);
+        res.put("data", newUserDTO);
         return ResponseEntity.ok(res);
     }
 }

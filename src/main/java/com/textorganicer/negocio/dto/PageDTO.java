@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PageDTO {
     private Integer id;
-    private Integer order;
+    private Integer page_order;
     private String titulo;
     private String subtitulo;
     private String firma;

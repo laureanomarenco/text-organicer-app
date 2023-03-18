@@ -12,4 +12,5 @@ public interface UserService {
     boolean userExists(String username);
     User save(User user);
     void delete(User user);
+    Optional<User> findByToken(String token);
 }

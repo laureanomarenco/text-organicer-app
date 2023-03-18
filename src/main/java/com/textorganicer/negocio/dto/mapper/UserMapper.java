@@ -38,7 +38,8 @@ public class UserMapper {
         return new UserPostDTO(
                 entity.getId(),
                 entity.getUsername(),
-                entity.getImagen()
+                entity.getImagen(),
+                entity.getToken()
         );
     }
 
