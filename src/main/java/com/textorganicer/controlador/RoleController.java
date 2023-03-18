@@ -22,11 +22,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/role")
 public class RoleController {
 
+    private final RoleMapper roleMapper;
     private final RoleService service;
     private final UserService userService;
     private final FolderService folderService;
 
-    public RoleController(RoleService service, UserService userService, FolderService folderService) {
+    public RoleController(RoleMapper roleMapper, RoleService service, UserService userService, FolderService folderService) {
+        this.roleMapper = roleMapper;
         this.service = service;
         this.userService = userService;
         this.folderService = folderService;
@@ -40,7 +42,7 @@ public class RoleController {
         try {
             List<Role> all = this.service.getAll();
             allDTO = all.stream()
-                    .map(RoleMapper::entityToDto)
+                    .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -65,7 +67,7 @@ public class RoleController {
             if (!role.isPresent()) {
                 throw new RuntimeException("No hay ningún rol con ese id");
             }
-            roleDTO = RoleMapper.entityToDto(role.get());
+            roleDTO = roleMapper.entityToDto(role.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -91,7 +93,7 @@ public class RoleController {
             if (!roles.isPresent()) throw new RuntimeException("Ese usuario no tiene roles");
 
             allDTO = roles.get().stream()
-                    .map(RoleMapper::entityToDto)
+                    .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -118,7 +120,7 @@ public class RoleController {
             if (!roles.isPresent()) throw new RuntimeException("Esta carpeta no tiene roles");
 
             allDTO = roles.get().stream()
-                    .map(RoleMapper::entityToDto)
+                    .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -145,7 +147,7 @@ public class RoleController {
             Optional<Role> role = this.service.findByUserAndFolder(id_user, id_folder);
             if (!role.isPresent()) throw new RuntimeException("No hay roles");
 
-            roleDTO = RoleMapper.entityToDto(role.get());
+            roleDTO = roleMapper.entityToDto(role.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -180,7 +182,7 @@ public class RoleController {
             role.setFolder(folder.orElseThrow());
 
             Role newRole = this.service.save(role);
-            newRoleDTO = RoleMapper.entityToDto(newRole);
+            newRoleDTO = roleMapper.entityToDto(newRole);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -207,7 +209,7 @@ public class RoleController {
             role.setUser(roleToUpdate.get().getUser());
             role.setFolder(roleToUpdate.get().getFolder());
             Role updated = this.service.save(role);
-            roleDTO = RoleMapper.entityToDto(updated);
+            roleDTO = roleMapper.entityToDto(updated);
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);

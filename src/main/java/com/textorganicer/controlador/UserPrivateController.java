@@ -8,10 +8,14 @@ import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
 import com.textorganicer.servicios.UserPrivateService;
 import com.textorganicer.servicios.UserService;
+import com.textorganicer.utils.HashGenerator;
+import com.textorganicer.utils.SaltGenerator;
+import com.textorganicer.utils.TokenGenerator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,10 +27,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/user_private")
 public class UserPrivateController {
 
+    private final UserPrivateMapper userPrivateMapper;
+    private UserMapper userMapper;
     private final UserPrivateService service;
     private final UserService userService;
 
-    public UserPrivateController(UserPrivateService service, UserService userService) {
+    public UserPrivateController(UserPrivateMapper userPrivateMapper, UserMapper userMapper, UserPrivateService service, UserService userService) {
+        this.userPrivateMapper = userPrivateMapper;
+        this.userMapper = userMapper;
         this.service = service;
         this.userService = userService;
     }
@@ -41,7 +49,7 @@ public class UserPrivateController {
             List<UserPrivate> all = this.service.getAll();
 
             allDTO = all.stream()
-                    .map(UserPrivateMapper::entityToDto)
+                    .map(userPrivateMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -67,7 +75,7 @@ public class UserPrivateController {
 
             if(!userPrivate.isPresent()) throw new RuntimeException("No hay ningún usuario con ese id");
 
-            userPrivateDTO = UserPrivateMapper.entityToDto(userPrivate.get());
+            userPrivateDTO = userPrivateMapper.entityToDto(userPrivate.get());
 
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
@@ -97,9 +105,14 @@ public class UserPrivateController {
 
             if(!user.isPresent()) throw new RuntimeException("hubo un problema, no se creo bien el usuario público");
 
+            byte[] salt = SaltGenerator.generateSalt();
+            userPrivate.setSalt(salt);
+            String hashedPassword = HashGenerator.hashPassword(userPrivate.getPassword(), salt);
+            userPrivate.setPassword(hashedPassword);
+
             userPrivate.setUser(user.orElseThrow());
             UserPrivate newUserPrivate = this.service.save(userPrivate);
-            newUserPrivateDTO = UserPrivateMapper.entityToDto(newUserPrivate);
+            newUserPrivateDTO = userPrivateMapper.entityToDto(newUserPrivate);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);
@@ -126,10 +139,13 @@ public class UserPrivateController {
 
             if(!userToUpdate.isPresent()) throw new RuntimeException("El usuario no existe");
 
+            userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.get().getSalt()));
+
+            userPrivate.setSalt(userToUpdate.get().getSalt());
             userPrivate.setUser(userToUpdate.get().getUser());
             UserPrivate updated = this.service.save(userPrivate);
 
-            updatedDTO = UserPrivateMapper.entityToDto(updated);
+            updatedDTO = userPrivateMapper.entityToDto(updated);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);
@@ -185,11 +201,20 @@ public class UserPrivateController {
             boolean isValid = this.service.validate(userPrivate, userToValidate);
 
             User validatedUser;
-            if(!isValid) throw new RuntimeException("Mail incorrecto o usuario inexistente");
+            if(!isValid) throw new RuntimeException("Password incorrecto");
             else validatedUser = userToValidate.orElseThrow().getUser();
 
-            validatedUserDTO = UserMapper.entityToDto(validatedUser);
 
+
+            String token = TokenGenerator.generateToken();
+            validatedUser.setToken(token);
+
+            LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
+            validatedUser.setTokenExpiration(expirationDate);
+
+            validatedUser = this.userService.save(validatedUser);
+
+            validatedUserDTO = userMapper.entityToDto(validatedUser);
 
         } catch (RuntimeException ex){
             res.put("success", Boolean.FALSE);

@@ -1,7 +1,8 @@
-package com.textorganicer.servicios;
+package com.textorganicer.servicios.impl;
 
 import com.textorganicer.negocio.dominios.Role;
 import com.textorganicer.respositorios.RoleRepository;
+import com.textorganicer.servicios.RoleService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

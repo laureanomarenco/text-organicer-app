@@ -1,7 +1,8 @@
-package com.textorganicer.servicios;
+package com.textorganicer.servicios.impl;
 
 import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.respositorios.FolderRepository;
+import com.textorganicer.servicios.FolderService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

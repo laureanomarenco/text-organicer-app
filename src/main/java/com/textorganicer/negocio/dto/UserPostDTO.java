@@ -11,4 +11,5 @@ public class UserPostDTO {
     private Integer id;
     private String username;
     private String imagen;
+    private String token;
 }

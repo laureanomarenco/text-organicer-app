@@ -4,31 +4,18 @@ import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Role;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dto.RoleDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class RoleMapper {
-    public static RoleDTO entityToDto(Role entity) {
-        return new RoleDTO(
-                entity.getId(),
-                entity.getUser().getId(),
-                entity.getFolder().getId(),
-                entity.getRole_type()
-        );
-    }
+@Mapper(componentModel = "spring")
+public interface RoleMapper {
 
-    public static Role dtoToEntity(RoleDTO dto) {
-        Role entity = new Role();
-        entity.setId(dto.getId());
+    @Mapping(source = "user.id", target = "id_user")
+    @Mapping(source = "folder.id", target = "id_folder")
+    RoleDTO entityToDto(Role entity);
 
-        User user = new User();
-        user.setId(dto.getId());
-        entity.setUser(user);
+    @Mapping(source = "id_user", target = "user.id")
+    @Mapping(source = "id_folder", target = "folder.id")
+    Role dtoToEntity(RoleDTO dto);
 
-        Folder folder = new Folder();
-        folder.setId(dto.getId());
-        entity.setFolder(folder);
-
-        entity.setRole_type(dto.getRole_type());
-
-        return entity;
-    }
 }
