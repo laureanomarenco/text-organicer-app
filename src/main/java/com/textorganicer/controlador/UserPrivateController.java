@@ -23,10 +23,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/user_private")
 public class UserPrivateController {
 
+    private UserMapper userMapper;
     private final UserPrivateService service;
     private final UserService userService;
 
-    public UserPrivateController(UserPrivateService service, UserService userService) {
+    public UserPrivateController(UserMapper userMapper, UserPrivateService service, UserService userService) {
+        this.userMapper = userMapper;
         this.service = service;
         this.userService = userService;
     }
@@ -188,7 +190,7 @@ public class UserPrivateController {
             if(!isValid) throw new RuntimeException("Mail incorrecto o usuario inexistente");
             else validatedUser = userToValidate.orElseThrow().getUser();
 
-            validatedUserDTO = UserMapper.entityToDto(validatedUser);
+            validatedUserDTO = userMapper.entityToDto(validatedUser);
 
 
         } catch (RuntimeException ex){

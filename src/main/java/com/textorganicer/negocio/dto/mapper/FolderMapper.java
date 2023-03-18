@@ -16,7 +16,6 @@ import java.util.List;
 public interface FolderMapper {
 
     @Mapping(target = "id_user", source = "user.id")
-    @Mapping(target = "page", source = "pages")
     FolderDTO entityToDto(Folder entity);
 
     Folder dtoToEntity(FolderDTO dto);

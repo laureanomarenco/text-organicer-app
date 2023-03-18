@@ -24,6 +24,8 @@ public class UserPrivate {
     @Column(name = "password")
     private String password;
 
+    private String sal;
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;

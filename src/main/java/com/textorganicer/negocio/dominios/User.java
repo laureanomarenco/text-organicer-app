@@ -19,14 +19,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(name = "username")
     private String username;
-
     @Column(name = "imagen")
     private String imagen;
+    private String token;
+
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @JsonIgnore
     private UserPrivate userPrivate;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

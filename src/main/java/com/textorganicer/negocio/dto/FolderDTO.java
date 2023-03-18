@@ -15,5 +15,4 @@ public class FolderDTO {
     private String nombre;
     private String is_public;
     private Integer id_user;
-    private List<Page> page;
 }

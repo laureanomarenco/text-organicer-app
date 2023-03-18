@@ -1,8 +1,11 @@
 package com.textorganicer.negocio.dto;
 
+import com.textorganicer.negocio.dominios.Folder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -11,5 +14,6 @@ public class UserDTO {
     private Integer id;
     private String username;
     private String imagen;
-    private Integer idUserPrivate;
+    private String token;
+    private List<FolderDTO> folders;
 }

@@ -19,10 +19,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserController {
 
+    private UserMapper userMapper;
     private final UserService service;
 
 //    private static Logger logger = LoggerFactory.getLogger(UserController.class);
-    public UserController(UserService service) {
+    public UserController(UserMapper userMapper, UserService service) {
+        this.userMapper = userMapper;
         this.service = service;
     }
 
@@ -35,7 +37,7 @@ public class UserController {
         try {
             List<User> all = this.service.getAll();
             allDtos = all.stream()
-                    .map(UserMapper::entityToDto)
+                    .map(userMapper::entityToDto)
                     .collect(Collectors.toList());
 
         } catch (RuntimeException ex) {
@@ -61,7 +63,7 @@ public class UserController {
             if(!user.isPresent()) {
                 throw new RuntimeException("No hay ningún usuario con ese id");
             }
-            userDTO = UserMapper.entityToDto(user.orElseThrow());
+            userDTO = userMapper.entityToDto(user.orElseThrow());
         log.info("get a usuarios");
 
         } catch (RuntimeException ex) {
@@ -91,7 +93,7 @@ public class UserController {
                 throw new RuntimeException("No hay ningún usuario con ese username");
             }
 
-            userDTO = UserMapper.entityToDto(user.get());
+            userDTO = userMapper.entityToDto(user.get());
 
         } catch (RuntimeException ex) {
             res.put("sucess", Boolean.FALSE);
@@ -118,7 +120,7 @@ public class UserController {
 
             User newUser = this.service.save(user);
 
-            newUserDTO = UserMapper.entityToPostDto(newUser);
+            newUserDTO = userMapper.entityToPostDto(newUser);
 
             log.info("usuario nuevo: " + newUser.toString());
         } catch (RuntimeException ex){
@@ -149,7 +151,7 @@ public class UserController {
             user.setFolders(userToUpdate.get().getFolders());
             User updated = this.service.save(user);
 
-            userDTO = UserMapper.entityToDto(updated);
+            userDTO = userMapper.entityToDto(updated);
 
         } catch (RuntimeException ex){
             res.put("sucess", Boolean.FALSE);

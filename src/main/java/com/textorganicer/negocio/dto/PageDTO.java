@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PageDTO {
     private Integer id;
+    private Integer order;
     private String titulo;
     private String subtitulo;
     private String firma;

@@ -9,6 +9,7 @@ public class PageMapper {
     public static PageDTO entityToDto(Page entity) {
       return new PageDTO(
               entity.getId(),
+              entity.getOrder(),
               entity.getTitulo(),
               entity.getSubtitulo(),
               entity.getFirma(),

@@ -1,8 +1,9 @@
-package com.textorganicer.servicios;
+package com.textorganicer.servicios.impl;
 
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.respositorios.UserPrivateRepository;
+import com.textorganicer.servicios.UserPrivateService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
