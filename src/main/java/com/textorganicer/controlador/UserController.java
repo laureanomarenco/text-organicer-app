@@ -1,5 +1,7 @@
 package com.textorganicer.controlador;
 
+import com.textorganicer.excepciones.NotFoundException;
+import com.textorganicer.excepciones.SessionException;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserPostDTO;
@@ -9,6 +11,8 @@ import com.textorganicer.utils.TokenGenerator;
 import lombok.extern.slf4j.Slf4j;
 
 
+import org.aspectj.weaver.ast.Not;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +20,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador de User "/user"
+ */
 @CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/user")
@@ -25,12 +32,15 @@ public class UserController {
     private UserMapper userMapper;
     private final UserService service;
 
-//    private static Logger logger = LoggerFactory.getLogger(UserController.class);
     public UserController(UserMapper userMapper, UserService service) {
         this.userMapper = userMapper;
         this.service = service;
     }
 
+    /**
+     * getAll de Users "/user/"
+     * @return List<UserDTO>
+     */
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         Map<String, Object> res = new HashMap<>();
@@ -45,16 +55,23 @@ public class UserController {
 
         } catch (RuntimeException ex) {
             res.put("sucess", Boolean.FALSE);
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
         res.put("success", Boolean.TRUE);
+        res.put("status", HttpStatus.OK);
         res.put("data", allDtos);
         return ResponseEntity.ok(res);
     }
 
+    /**
+     * getByID de User "user/{id}"
+     * @param id
+     * @return UserDTO
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Integer id){
         Map<String, Object> res = new HashMap<>();
@@ -64,25 +81,32 @@ public class UserController {
         try {
             Optional<User> user = this.service.findById(id);
             if(!user.isPresent()) {
-                throw new RuntimeException("No hay ningún usuario con ese id");
+                throw new NotFoundException("No hay ningún usuario con ese id");
             }
             userDTO = userMapper.entityToDto(user.orElseThrow());
-        log.info("get a usuarios");
 
-        } catch (RuntimeException ex) {
+        } catch (NotFoundException ex) {
             res.put("sucess", Boolean.FALSE);
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+
         res.put("success", Boolean.TRUE);
+        res.put("status", HttpStatus.OK);
         res.put("data", userDTO);
 
         return ResponseEntity.ok(res);
     }
 
+    /**
+     * get User by username "user/username?username=xxxx"
+     * @param username
+     * @return UserDTO
+     */
     @GetMapping("/username")
     public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
         Map<String, Object> res = new HashMap<>();
@@ -93,13 +117,14 @@ public class UserController {
             Optional<User> user = this.service.findByUsername(username);
 
             if(!user.isPresent()) {
-                throw new RuntimeException("No hay ningún usuario con ese username");
+                throw new NotFoundException("No hay ningún usuario con ese username");
             }
 
             userDTO = userMapper.entityToDto(user.get());
 
-        } catch (RuntimeException ex) {
+        } catch (NotFoundException ex) {
             res.put("sucess", Boolean.FALSE);
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
@@ -107,11 +132,17 @@ public class UserController {
         }
 
         res.put("success", Boolean.TRUE);
+        res.put("status", HttpStatus.OK);
         res.put("data", userDTO);
 
         return ResponseEntity.ok(res);
     }
 
+    /**
+     * Post de User "/user"
+     * @param user
+     * @return UserPostDTO
+     */
     @PostMapping
     public ResponseEntity<?> newUser(@RequestBody User user) {
         Map<String, Object> res = new HashMap<>();
@@ -133,18 +164,29 @@ public class UserController {
 
             log.info("usuario nuevo: " + newUser.toString());
         } catch (RuntimeException ex){
+            log.error("postUser - " + ex.getMessage());
+
             res.put("sucess", Boolean.FALSE);
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
         }
+        log.info("postUser - " + newUserDTO.toString());
 
+        res.put("status", HttpStatus.CREATED);
         res.put("success", Boolean.TRUE);
         res.put("data", newUserDTO);
         return ResponseEntity.ok(res);
     }
 
+    /**
+     *
+     * @param id
+     * @param user
+     * @return UserDTO
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User user) {
         Map<String, Object> res = new HashMap<>();
@@ -153,7 +195,7 @@ public class UserController {
 
         try {
             Optional<User> userToUpdate = this.service.findById(id);
-            if(!userToUpdate.isPresent()) throw new RuntimeException("El usuario no existe");
+            if(!userToUpdate.isPresent()) throw new NotFoundException("El usuario no existe");
 
             user.setUserPrivate(userToUpdate.get().getUserPrivate());
             user.setRoles(userToUpdate.get().getRoles());
@@ -164,20 +206,30 @@ public class UserController {
 
             userDTO = userMapper.entityToDto(updated);
 
-        } catch (RuntimeException ex){
+        } catch (NotFoundException ex){
+            log.error("updateUser - " + ex.getMessage());
+
             res.put("sucess", Boolean.FALSE);
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
         }
+        log.info("updateUser - " + userDTO.toString());
 
         res.put("success", Boolean.TRUE);
+        res.put("status", HttpStatus.ACCEPTED);
         res.put("data", userDTO);
 
         return ResponseEntity.ok(res);
     }
 
+    /**
+     * delete user "/user/{id}"
+     * @param id
+     * @return ok
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
         Map<String, Object> res = new HashMap<>();
@@ -187,12 +239,15 @@ public class UserController {
         try {
             user = this.service.findById(id);
             if(!user.isPresent()) {
-                throw new RuntimeException("El usuario no existe");
+                throw new NotFoundException("El usuario no existe");
             }
 
             this.service.delete(user.orElseThrow());
 
-        } catch (RuntimeException ex){
+        } catch (NotFoundException ex){
+            log.error("deleteUser - " + ex.getMessage());
+
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("sucess", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
 
@@ -200,11 +255,18 @@ public class UserController {
                     .body(res);
         }
 
+        log.info("deleteUser - " + id);
+        res.put("status", HttpStatus.OK);
         res.put("success", Boolean.TRUE);
 
         return ResponseEntity.ok(res);
     }
 
+    /**
+     * Validar token "/user/validateToken/{token}"
+     * @param token
+     * @return UserDTO
+     */
     @PostMapping("/validateToken/{token}")
     public ResponseEntity<?> validateToken(@PathVariable String token) {
         Map<String, Object> res = new HashMap<>();
@@ -213,15 +275,16 @@ public class UserController {
 
         try {
             Optional<User> userToValidate = this.service.findByToken(token);
-            if(!userToValidate.isPresent()) throw new RuntimeException("Token inexistente");
+            if(!userToValidate.isPresent()) throw new SessionException("Token inexistente");
 
             LocalDateTime now = LocalDateTime.now();
-            if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new RuntimeException("Token expirado");
+            if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new SessionException("Token expirado");
 
             newUserDTO = this.userMapper.entityToDto(userToValidate.get());
 
-
-        } catch (RuntimeException ex){
+        } catch (SessionException ex){
+            log.error("validateToken - " + ex.getMessage());
+            res.put("status", HttpStatus.BAD_REQUEST);
             res.put("sucess", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
 
@@ -229,6 +292,9 @@ public class UserController {
                     .body(res);
         }
 
+        log.info("validateToken - " + newUserDTO.toString());
+
+        res.put("status", HttpStatus.OK);
         res.put("success", Boolean.TRUE);
         res.put("data", newUserDTO);
         return ResponseEntity.ok(res);
