@@ -21,7 +21,6 @@ public class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-
     }
     @AfterEach
     void tearDown() {
@@ -54,6 +53,4 @@ public class UserRepositoryTest {
         assertThat(userByToken.isPresent())
                 .isTrue();
     }
-
-
 }

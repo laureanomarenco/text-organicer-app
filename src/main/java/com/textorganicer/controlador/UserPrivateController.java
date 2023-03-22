@@ -279,7 +279,7 @@ public class UserPrivateController {
         } catch (AuthException ex){
             log.error("login - " + ex.getMessage());
 
-            res.put("status", HttpStatus.BAD_REQUEST);
+            res.put("status", HttpStatus.UNAUTHORIZED);
             res.put("success", Boolean.FALSE);
             res.put("message", ex.getMessage());
 

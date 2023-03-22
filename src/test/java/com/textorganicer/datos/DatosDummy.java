@@ -12,7 +12,6 @@ import java.util.List;
 public class DatosDummy {
 
     public static User uno = getUserUno();
-    public static UserPrivate unoPrivate = getUserPrivateUno();
 
     // ##########################
     // #######    USER    #######
@@ -24,11 +23,9 @@ public class DatosDummy {
         user.setImagen("http://");
         user.setToken(TokenGenerator.generateToken());
         user.setTokenExpiration(LocalDateTime.now().plusHours(10));
-//        user.setUserPrivate(unoPrivate);
-//        user.setFolders(folders);
-//        user.setRoles(rolesUserUno);
+
         return user;
-                //(0, "Usuario", "http://", TokenGenerator.generateToken(), LocalDateTime.now().plusHours(10), unoPrivate, folders, rolesUserUno);
+
     }
 
     public static UserPrivate getUserPrivateUno() {
