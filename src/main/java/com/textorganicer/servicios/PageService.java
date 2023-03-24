@@ -8,8 +8,8 @@ import java.util.Optional;
 
 public interface PageService {
     List<Page> getAll();
-    Optional<Page> findById(Integer id);
-    Optional<List<Page>> getAllByFolder(Integer idFolder);
+    Page findById(Integer id);
+    List<Page> getAllByFolder(Integer idFolder);
     Page save(Page page);
     void delete(Page page);
 

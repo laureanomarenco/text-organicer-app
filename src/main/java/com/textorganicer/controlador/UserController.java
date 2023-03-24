@@ -35,22 +35,26 @@ public class UserController {
         this.service = service;
     }
 
+
+
     /**
      * getAll de Users "/user/"
      * @return List<UserDTO>
      */
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<UserDTO> allDtos;
 
         try {
+            // FIND & MAP
             List<User> all = this.service.getAll();
             allDtos = all.stream()
                     .map(userMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("sucess", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -59,11 +63,14 @@ public class UserController {
                     .body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDtos);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * getByID de User "user/{id}"
@@ -71,34 +78,35 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Integer id){
+    public ResponseEntity<?> getUserById(
+            @PathVariable Integer id
+    ){
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-         UserDTO userDTO;
+        UserDTO userDTO;
 
         try {
-            Optional<User> user = this.service.findById(id);
-            if(!user.isPresent()) {
-                throw new NotFoundException("No hay ningún usuario con ese id");
-            }
-            userDTO = userMapper.entityToDto(user.orElseThrow());
+            // FIND & MAP
+            User user = this.service.findById(id);
+            userDTO = userMapper.entityToDto(user);
 
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("sucess", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
-
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", userDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * get User by username "user/username?username=xxxx"
@@ -106,35 +114,35 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping("/username")
-    public ResponseEntity<?> getUserByUsername(@RequestParam String username) {
+    public ResponseEntity<?> getUserByUsername(
+            @RequestParam String username
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-         UserDTO userDTO;
+        UserDTO userDTO;
 
         try {
-            Optional<User> user = this.service.findByUsername(username);
+            // FIND & MAP
+            User user = this.service.findByUsername(username);
+            userDTO = userMapper.entityToDto(user);
 
-            if(!user.isPresent()) {
-                throw new NotFoundException("No hay ningún usuario con ese username");
-            }
-
-            userDTO = userMapper.entityToDto(user.get());
-
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("sucess", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", userDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Post de User "/user"
@@ -142,42 +150,46 @@ public class UserController {
      * @return UserPostDTO
      */
     @PostMapping
-    public ResponseEntity<?> newUser(@RequestBody User user) {
+    public ResponseEntity<?> newUser(
+            @RequestBody User user
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-         UserPostDTO newUserDTO;
+        UserPostDTO newUserDTO;
 
         try {
+            // VALIDATE
             if(this.service.userExists(user.getUsername())) throw new RuntimeException("El username ya existe");
 
+            // SET
             String token = TokenGenerator.generateToken();
             user.setToken(token);
-
             LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
             user.setTokenExpiration(expirationDate);
 
+            // SAVE & MAP
             User newUser = this.service.save(user);
-
             newUserDTO = userMapper.entityToPostDto(newUser);
 
-            log.info("usuario nuevo: " + newUser.toString());
+            // ERROR
         } catch (RuntimeException ex){
             log.error("postUser - " + ex.getMessage());
-
             res.put("sucess", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
-        log.info("postUser - " + newUserDTO.toString());
 
+        // SUCCESS
+        log.info("postUser - " + newUserDTO.toString());
         res.put("status", HttpStatus.CREATED);
         res.put("success", Boolean.TRUE);
         res.put("data", newUserDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      *
@@ -187,41 +199,43 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User user) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         UserDTO userDTO;
 
         try {
-            Optional<User> userToUpdate = this.service.findById(id);
-            if(!userToUpdate.isPresent()) throw new NotFoundException("El usuario no existe");
+            // FIND & SET
+            User userToUpdate = this.service.findById(id);
 
-            user.setUserPrivate(userToUpdate.get().getUserPrivate());
-            user.setRoles(userToUpdate.get().getRoles());
-            user.setFolders(userToUpdate.get().getFolders());
-            user.setToken(userToUpdate.get().getToken());
-            user.setTokenExpiration(userToUpdate.get().getTokenExpiration());
+            user.setUserPrivate(userToUpdate.getUserPrivate());
+            user.setRoles(userToUpdate.getRoles());
+            user.setFolders(userToUpdate.getFolders());
+            user.setToken(userToUpdate.getToken());
+            user.setTokenExpiration(userToUpdate.getTokenExpiration());
+
+            // SAVE & MAP
             User updated = this.service.save(user);
-
             userDTO = userMapper.entityToDto(updated);
 
+            // ERROR
         } catch (NotFoundException ex){
             log.error("updateUser - " + ex.getMessage());
-
             res.put("sucess", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
-        log.info("updateUser - " + userDTO.toString());
 
+        // SUCCESS
+        log.info("updateUser - " + userDTO.toString());
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
         res.put("data", userDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * delete user "/user/{id}"
@@ -229,36 +243,36 @@ public class UserController {
      * @return ok
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteUser(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-        Optional<User> user;
+        User user;
 
         try {
+            // FIND & DELETE
             user = this.service.findById(id);
-            if(!user.isPresent()) {
-                throw new NotFoundException("El usuario no existe");
-            }
+            this.service.delete(user);
 
-            this.service.delete(user.orElseThrow());
-
+            // ERROR
         } catch (NotFoundException ex){
             log.error("deleteUser - " + ex.getMessage());
-
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("sucess", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         log.info("deleteUser - " + id);
         res.put("status", HttpStatus.OK);
         res.put("success", Boolean.TRUE);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Validar token "/user/validateToken/{token}"
@@ -266,32 +280,30 @@ public class UserController {
      * @return UserDTO
      */
     @PostMapping("/validateToken/{token}")
-    public ResponseEntity<?> validateToken(@PathVariable String token) {
+    public ResponseEntity<?> validateToken(
+            @PathVariable String token
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         UserDTO newUserDTO;
 
         try {
-            Optional<User> userToValidate = this.service.findByToken(token);
-            if(!userToValidate.isPresent()) throw new SessionException("Token inexistente");
+            // FIND & MAP
+            User userToValidate = this.service.findByToken(token);
+            newUserDTO = this.userMapper.entityToDto(userToValidate);
 
-            LocalDateTime now = LocalDateTime.now();
-            if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new SessionException("Token expirado");
-
-            newUserDTO = this.userMapper.entityToDto(userToValidate.get());
-
+            // ERROR
         } catch (SessionException ex){
             log.error("validateToken - " + ex.getMessage());
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("sucess", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         log.info("validateToken - " + newUserDTO.toString());
-
         res.put("status", HttpStatus.OK);
         res.put("success", Boolean.TRUE);
         res.put("data", newUserDTO);

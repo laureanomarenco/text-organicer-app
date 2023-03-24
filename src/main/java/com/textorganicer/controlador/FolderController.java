@@ -87,12 +87,9 @@ public class FolderController {
         FolderDTO folderDTO;
 
         try {
-            // FIND
-            Optional<Folder> folder = this.service.findById(id);
-            if(folder.isEmpty()) throw new NotFoundException("No hay ninguna carpeta con ese id");
-
-            // MAP
-            folderDTO = folderMapper.entityToDto(folder.get());
+            // FIND & MAP
+            Folder folder = this.service.findById(id);
+            folderDTO = folderMapper.entityToDto(folder);
 
             // ERROR
         } catch (NotFoundException ex) {
@@ -127,9 +124,8 @@ public class FolderController {
 
         try {
             // FIND && MAP
-            Optional<List<Folder>> all = this.service.getAllByUser(id_user);
-            if(all.isEmpty()) throw new NotFoundException("Este usuario no tiene carpetas");
-            allDTO = all.get().stream()
+            List<Folder> all = this.service.getAllByUser(id_user);
+            allDTO = all.stream()
                     .map(folderMapper::entityToDto)
                     .collect(Collectors.toList());
 
@@ -168,10 +164,9 @@ public class FolderController {
 
         try {
             // FIND
-            Optional<User> user = this.userService.findById(id_user);
-            if(user.isEmpty()) throw new NotFoundException("hubo un problema, no se encontró el usuario");
+            User user = this.userService.findById(id_user);
             // SET & POST
-            folder.setUser(user.get());
+            folder.setUser(user);
             Folder newFolder = this.service.save(folder);
             // MAP
             folderDTO = folderMapper.entityToDto(newFolder);
@@ -213,12 +208,12 @@ public class FolderController {
 
         try {
             // FIND
-            Optional<Folder> folderToUpdate = this.service.findById(id);
-            if(folderToUpdate.isEmpty()) throw new NotFoundException("La carpeta no existe");
+            Folder folderToUpdate = this.service.findById(id);
+
             // SET & POST
-            folder.setUser(folderToUpdate.get().getUser());
-            folder.setRoles(folderToUpdate.get().getRoles());
-            folder.setPages(folderToUpdate.get().getPages());
+            folder.setUser(folderToUpdate.getUser());
+            folder.setRoles(folderToUpdate.getRoles());
+            folder.setPages(folderToUpdate.getPages());
             Folder updated = this.service.save(folder);
             // MAP
             folderDTO = folderMapper.entityToDto(updated);
@@ -254,13 +249,13 @@ public class FolderController {
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        Optional<Folder> folder;
+        Folder folder;
 
         try {
             // FIND & DELETE
             folder = this.service.findById(id);
-            if(folder.isEmpty()) throw new NotFoundException("La carpeta no existe");
-            this.service.delete(folder.orElseThrow());
+
+            this.service.delete(folder);
 
             // ERROR
         } catch (NotFoundException ex){

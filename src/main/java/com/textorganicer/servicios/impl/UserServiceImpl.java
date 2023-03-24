@@ -1,10 +1,13 @@
 package com.textorganicer.servicios.impl;
 
+import com.textorganicer.excepciones.NotFoundException;
+import com.textorganicer.excepciones.SessionException;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.respositorios.UserRepository;
 import com.textorganicer.servicios.UserService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,13 +26,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findById(Integer id) {
-        return this.repository.findById(id);
+    public User findById(Integer id) {
+        Optional<User> user = this.repository.findById(id);
+        if(user.isEmpty()) throw new NotFoundException("No hay ningún usuario con ese id");
+
+        return user.get();
     }
 
     @Override
-    public Optional<User> findByUsername(String username) {
-        return this.repository.findByUsername(username);
+    public User findByUsername(String username) {
+        Optional<User> user= this.repository.findByUsername(username);
+        if(user.isEmpty()) throw new NotFoundException("No hay ningún usuario con ese username");
+
+        return user.get();
     }
 
     @Override
@@ -51,7 +60,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByToken(String token) {
-        return this.repository.findByToken(token);
+    public User findByToken(String token) {
+        Optional<User> userToValidate = this.repository.findByToken(token);
+        if(userToValidate.isEmpty()) throw new SessionException("Token inexistente");
+        LocalDateTime now = LocalDateTime.now();
+        if(now.isAfter(userToValidate.get().getTokenExpiration())) throw new SessionException("Token expirado");
+
+        return userToValidate.get();
     }
 }

@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public interface RoleService {
     List<Role> getAll();
-    Optional<Role> findById(Integer id);
-    Optional<List<Role>> getAllByFolderId(Integer idFolder);
-    Optional<List<Role>> findShared(Integer idUser);
-    Optional<Role> findByUserAndFolder(Integer idUser, Integer idFolder);
+    Role findById(Integer id);
+    List<Role> getAllByFolderId(Integer idFolder);
+    List<Role> findShared(Integer idUser);
+    Role findByUserAndFolder(Integer idUser, Integer idFolder);
     Role save(Role role);
     void delete(Role role);
 

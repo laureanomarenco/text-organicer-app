@@ -41,21 +41,26 @@ public class RoleController {
         this.folderService = folderService;
     }
 
+
+
     /**
      * getAll de Roles "/role/"
      * @return List<RoleDTO>
      */
     @GetMapping
     public ResponseEntity<?> getAllRoles() {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-         List<RoleDTO> allDTO;
+        List<RoleDTO> allDTO;
 
         try {
+            // GET & MAP
             List<Role> all = this.service.getAll();
             allDTO = all.stream()
                     .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -63,11 +68,14 @@ public class RoleController {
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * getByID de Role "role/{id}"
@@ -76,31 +84,31 @@ public class RoleController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getRoleById(@PathVariable Integer id) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         RoleDTO roleDTO;
 
         try {
-            Optional<Role> role = this.service.findById(id);
-            if (!role.isPresent()) {
-                throw new NotFoundException("No hay ningún rol con ese id");
-            }
-            roleDTO = roleMapper.entityToDto(role.get());
+            // FIND & MAP
+            Role role = this.service.findById(id);
+            roleDTO = roleMapper.entityToDto(role);
 
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", roleDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Get roles by id_user "/role/byUser/{id_user}"
@@ -109,32 +117,33 @@ public class RoleController {
      */
     @GetMapping("/byUser/{id_user}")
     public ResponseEntity<?> getAllByUserId(@PathVariable Integer id_user) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<RoleDTO> allDTO;
 
         try {
-            Optional<List<Role>> roles = this.service.findShared(id_user);
-            if (!roles.isPresent()) throw new NotFoundException("Ese usuario no tiene roles");
-
-            allDTO = roles.get().stream()
+            // FIND & MAP
+            List<Role> roles = this.service.findShared(id_user);
+            allDTO = roles.stream()
                     .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Get roles by id_folder "/role/byFolder/{id_folder}"
@@ -143,32 +152,33 @@ public class RoleController {
      */
     @GetMapping("/byFolder/{id_folder}")
     public ResponseEntity<?> getAllByFolderId(@PathVariable Integer id_folder) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<RoleDTO> allDTO;
 
         try {
-            Optional<List<Role>> roles = this.service.getAllByFolderId(id_folder);
-            if (!roles.isPresent()) throw new NotFoundException("Esta carpeta no tiene roles");
-
-            allDTO = roles.get().stream()
+            // FIND & MAP
+            List<Role> roles = this.service.getAllByFolderId(id_folder);
+            allDTO = roles.stream()
                     .map(roleMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Get roles by id_user y id_folder "/role/byUserAndFolder"
@@ -177,18 +187,20 @@ public class RoleController {
      * @return RoleDTO
      */
     @GetMapping("/byUserAndFolder")
-    public ResponseEntity<?> getAllByUserId(@RequestParam Integer id_user,
-                                            @RequestParam Integer id_folder) {
+    public ResponseEntity<?> getAllByUserId(
+            @RequestParam Integer id_user,
+            @RequestParam Integer id_folder
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         RoleDTO roleDTO;
 
         try {
-            Optional<Role> role = this.service.findByUserAndFolder(id_user, id_folder);
-            if (!role.isPresent()) throw new NotFoundException("No hay roles");
+            // FIND & MAP
+            Role role = this.service.findByUserAndFolder(id_user, id_folder);
+            roleDTO = roleMapper.entityToDto(role);
 
-            roleDTO = roleMapper.entityToDto(role.get());
-
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -197,10 +209,10 @@ public class RoleController {
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", roleDTO);
-
         return ResponseEntity.ok(res);
     }
 
@@ -212,44 +224,44 @@ public class RoleController {
      * @return
      */
     @PostMapping
-    public ResponseEntity<?> newRole(@RequestBody Role role,
-                                     @RequestParam Integer id_user,
-                                     @RequestParam Integer id_folder) {
+    public ResponseEntity<?> newRole(
+            @RequestBody Role role,
+            @RequestParam Integer id_user,
+            @RequestParam Integer id_folder
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         RoleDTO newRoleDTO;
 
         try {
-            Optional<User> user = this.userService.findById(id_user);
-            Optional<Folder> folder = this.folderService.findById(id_folder);
+            // FIND & SET
+            User user = this.userService.findById(id_user);
+            Folder folder = this.folderService.findById(id_folder);
+            role.setUser(user);
+            role.setFolder(folder);
 
-            if(!user.isPresent()) throw new NotFoundException("El usuario pasado no existe");
-
-            if(!folder.isPresent()) throw new NotFoundException("La carpeta pasada no existe");
-
-            role.setUser(user.orElseThrow());
-            role.setFolder(folder.orElseThrow());
-
+            //SAVE & MAP
             Role newRole = this.service.save(role);
             newRoleDTO = roleMapper.entityToDto(newRole);
 
+            // ERROR
         } catch (NotFoundException ex) {
             log.error("newRole - " + ex.getMessage());
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         log.info("newRole - " + newRoleDTO.toString());
-
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.CREATED);
         res.put("data", newRoleDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Update de role "/role/{id}"
@@ -258,37 +270,41 @@ public class RoleController {
      * @return RoleDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRole(@PathVariable Integer id, @RequestBody Role role) {
+    public ResponseEntity<?> updateRole(
+            @PathVariable Integer id,
+            @RequestBody Role role
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         RoleDTO roleDTO;
 
         try {
-            Optional<Role> roleToUpdate = this.service.findById(id);
-            if (!roleToUpdate.isPresent()) throw new NotFoundException("El rol no existe");
-
-            role.setUser(roleToUpdate.get().getUser());
-            role.setFolder(roleToUpdate.get().getFolder());
+            // FIND & SET
+            Role roleToUpdate = this.service.findById(id);
+            role.setUser(roleToUpdate.getUser());
+            role.setFolder(roleToUpdate.getFolder());
+            // SAVE & MAP
             Role updated = this.service.save(role);
             roleDTO = roleMapper.entityToDto(updated);
 
+            //ERROR
         } catch (NotFoundException ex) {
             log.error("updateRole - " + ex.getMessage());
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
-        log.info("updateRole: " + roleDTO.toString());
 
+        // SUCCESS
+        log.info("updateRole: " + roleDTO.toString());
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
         res.put("data", roleDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * delete de Role "/role/{id}"
@@ -297,32 +313,28 @@ public class RoleController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Integer id) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-        Optional<Role> role;
+        Role role;
 
         try {
+            // FIND & DELETE
             role = this.service.findById(id);
-            if (!role.isPresent()) {
-                throw new NotFoundException("El rol no existe");
-            }
+            this.service.delete(role);
 
-            this.service.delete(role.orElseThrow());
-
+            // ERROR
         } catch (NotFoundException ex) {
             log.error("deleteRole - " + ex.getMessage());
-
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("success", Boolean.FALSE);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
-        log.info("deleteRole - " + id);
 
+        // SUCCESS
+        log.info("deleteRole - " + id);
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
-
         return ResponseEntity.ok(res);
     }
 
