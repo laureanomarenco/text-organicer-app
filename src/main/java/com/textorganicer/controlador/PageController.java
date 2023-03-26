@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,23 +38,26 @@ public class PageController {
         this.folderService = folderService;
     }
 
+
+
     /**
      * getAll de Page "/page/"
      * @return List<PageDTO>
      */
     @GetMapping
     public ResponseEntity<?> getAllPages() {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<PageDTO> allDTO;
 
         try {
+            // GET & MAP
             List<Page> all = this.service.getAll();
-
             allDTO = all.stream()
                     .map(pageMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -63,11 +65,14 @@ public class PageController {
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * getByID de Page "page/{id}"
@@ -75,33 +80,34 @@ public class PageController {
      * @return PageDTO
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPageById(@PathVariable Integer id) {
+    public ResponseEntity<?> getPageById(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-         PageDTO pageDTO;
+        PageDTO pageDTO;
 
         try {
-            Optional<Page> page = this.service.findById(id);
-            if (!page.isPresent()) {
-                throw new NotFoundException("No hay ninguna página con ese id");
-            }
+            // FIND & MAP
+            Page page = this.service.findById(id);
+            pageDTO = pageMapper.entityToDto(page);
 
-            pageDTO = pageMapper.entityToDto(page.get());
-
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", pageDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Get pages by id_folder "/page/{id_folder}"
@@ -109,19 +115,21 @@ public class PageController {
      * @return List<PageDTO>
      */
     @GetMapping("byFolder/{id_folder}")
-    public ResponseEntity<?> getAllPages(@PathVariable Integer id_folder) {
+    public ResponseEntity<?> getAllPages(
+            @PathVariable Integer id_folder
+    ) {
+        // CONSTANT  OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<PageDTO> allDTO;
 
         try {
-            Optional<List<Page>> all = this.service.getAllByFolder(id_folder);
-            if(!all.isPresent()) throw new NotFoundException("No hay páginas en esta carpeta");
-
-            allDTO = all.get().stream()
+            // FIND & MAP
+            List<Page> all = this.service.getAllByFolder(id_folder);
+            allDTO = all.stream()
                     .map(pageMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -129,11 +137,14 @@ public class PageController {
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Post de page "/page/{id_folder}"
@@ -142,38 +153,40 @@ public class PageController {
      * @return PageDTO
      */
     @PostMapping("/{id_folder}")
-    public ResponseEntity<?> newPage(@RequestBody Page page, @PathVariable Integer id_folder) {
+    public ResponseEntity<?> newPage(
+            @RequestBody Page page,
+            @PathVariable Integer id_folder
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         PageDTO newPageDTO;
 
         try {
-            Optional<Folder> folder = this.folderService.findById(id_folder);
-            if(!folder.isPresent()){
-                throw new NotFoundException("hubo un problema, no se encontró la carpeta");
-            }
-            page.setFolder(folder.orElseThrow());
+            // FIND & SET
+            Folder folder = this.folderService.findById(id_folder);
+            page.setFolder(folder);
+            // SAVE & MAP
             Page newPage = this.service.save(page);
-
             newPageDTO = pageMapper.entityToDto(newPage);
 
+            // ERROR
         } catch (NotFoundException ex) {
             log.error("newPage - Carpeta no encontrada");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         log.info("newFolder - " + newPageDTO.toString());
-
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.CREATED);
         res.put("data", newPageDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Update Page "/page/{id}"
@@ -182,38 +195,40 @@ public class PageController {
      * @return pageDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePage(@PathVariable Integer id, @RequestBody Page page) {
+    public ResponseEntity<?> updatePage(
+            @PathVariable Integer id,
+            @RequestBody Page page
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         PageDTO pageDTO;
 
         try {
-            Optional<Page> pageToUpdate = this.service.findById(id);
-            if (!pageToUpdate.isPresent()) throw new NotFoundException("La página no existe");
-
-            page.setFolder(pageToUpdate.get().getFolder());
+            // FIND & SET
+            Page pageToUpdate = this.service.findById(id);
+            page.setFolder(pageToUpdate.getFolder());
+            // SAVE & MAP
             Page updated = this.service.save(page);
             pageDTO = pageMapper.entityToDto(updated);
 
+            // ERROR
         } catch (NotFoundException ex) {
             log.error("updatePage - Página inexistente");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
-        log.info("updatePage: " + pageDTO.toString());
-
+        // SUCCESS
+        log.info("updatePage: " + id);
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
-
         res.put("data", pageDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Delete Page "/page/{id}"
@@ -221,35 +236,31 @@ public class PageController {
      * @return ok
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePage(@PathVariable Integer id) {
+    public ResponseEntity<?> deletePage(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-        Optional<Page> page;
+        Page page;
 
         try {
+            // FIND & DELETE
             page = this.service.findById(id);
-            if (!page.isPresent()) {
-                throw new NotFoundException("La página no existe");
-            }
+            this.service.delete(page);
 
-            this.service.delete(page.orElseThrow());
-
+            // ERROR
         } catch (NotFoundException ex) {
             log.error("deletePage - Página inexistente");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest().body(res);
         }
 
+        // SUCCESS
         log.info("deletePage - " + id);
-
         res.put("status", HttpStatus.ACCEPTED);
         res.put("success", Boolean.TRUE);
-
         return ResponseEntity.ok(res);
     }
-
 }

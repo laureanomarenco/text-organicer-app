@@ -1,6 +1,5 @@
 package com.textorganicer.negocio.dto;
 
-import com.textorganicer.negocio.dominios.Folder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

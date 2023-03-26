@@ -1,5 +1,6 @@
 package com.textorganicer.servicios.impl;
 
+import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.Role;
 import com.textorganicer.respositorios.RoleRepository;
 import com.textorganicer.servicios.RoleService;
@@ -23,23 +24,35 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<Role> findById(Integer id) {
-        return this.repository.findById(id);
+    public Role findById(Integer id) {
+        Optional<Role> role = this.repository.findById(id);
+        if (role.isEmpty()) throw new NotFoundException("No hay ningún rol con ese id");
+
+        return role.get();
     }
 
     @Override
-    public Optional<List<Role>> getAllByFolderId(Integer id_folder) {
-        return this.repository.getAllByFolderId(id_folder);
+    public List<Role> getAllByFolderId(Integer id_folder) {
+        Optional<List<Role>> roles= this.repository.getAllByFolderId(id_folder);
+        if (roles.isEmpty()) throw new NotFoundException("Esta carpeta no tiene roles");
+
+        return roles.get();
     }
 
     @Override
-    public Optional<List<Role>> findShared(Integer idUser) {
-        return this.repository.findShared(idUser);
+    public List<Role> findShared(Integer idUser) {
+        Optional<List<Role>> roles= this.repository.findShared(idUser);
+        if (roles.isEmpty()) throw new NotFoundException("Ese usuario no tiene roles");
+
+        return roles.get();
     }
 
     @Override
-    public Optional<Role> findByUserAndFolder(Integer idUser, Integer idFolder) {
-        return this.repository.findByIdAndFolder(idUser, idFolder);
+    public Role findByUserAndFolder(Integer idUser, Integer idFolder) {
+        Optional<Role> role = this.repository.findByIdAndFolder(idUser, idFolder);
+        if (role.isEmpty()) throw new NotFoundException("No hay roles");
+
+        return role.get();
     }
 
     @Override

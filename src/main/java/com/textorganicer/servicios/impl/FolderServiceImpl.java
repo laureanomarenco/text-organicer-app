@@ -1,5 +1,6 @@
 package com.textorganicer.servicios.impl;
 
+import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.respositorios.FolderRepository;
 import com.textorganicer.servicios.FolderService;
@@ -23,13 +24,18 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public Optional<Folder> findById(Integer id) {
-        return this.repository.findById(id);
+    public Folder findById(Integer id) {
+        Optional<Folder> folder = this.repository.findById(id);
+        if(folder.isEmpty()) throw new NotFoundException("No hay ninguna carpeta con ese id");
+
+        return folder.get();
     }
 
     @Override
-    public Optional<List<Folder>> getAllByUser(Integer idUser) {
-        return this.repository.getAllByUser(idUser);
+    public List<Folder> getAllByUser(Integer idUser) {
+        Optional<List<Folder>> all = this.repository.getAllByUser(idUser);
+        if(all.isEmpty()) throw new NotFoundException("Este usuario no tiene carpetas");
+        return all.get();
     }
 
     @Override

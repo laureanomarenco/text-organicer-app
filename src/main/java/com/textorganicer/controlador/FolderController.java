@@ -18,43 +18,44 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
+/**----------------------------------------------
  * Controlador de Carpetas "/folder"
- */
+ ----------------------------------------------*/
+@Slf4j
 @CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/folder")
-@Slf4j
 public class FolderController {
-
+    // INJECTION
     private final FolderService service;
     private final UserService userService;
     private final FolderMapper folderMapper;
-
-
     public FolderController(FolderService service, UserService userService, FolderMapper folderMapper) {
         this.service = service;
         this.userService = userService;
         this.folderMapper = folderMapper;
     }
 
+
     /**
      * getAll de Folders "/folder/"
      * @return List<FolderDTO>
-     */
+    */
     @GetMapping
     public ResponseEntity<?> getAllFolders() {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<FolderDTO> allDTO;
 
         try {
+            // GET & MAP
             List<Folder> all = this.service.getAll();
-
-            allDTO = all.stream()
+            allDTO = all
+                    .stream()
                     .map(folderMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (RuntimeException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
@@ -63,11 +64,14 @@ public class FolderController {
                     .body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * getByID de Folder "folder/{id}"
@@ -75,34 +79,35 @@ public class FolderController {
      * @return FolderDTO
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getFolderById(@PathVariable Integer id){
+    public ResponseEntity<?> getFolderById(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         FolderDTO folderDTO;
 
         try {
-            Optional<Folder> folder = this.service.findById(id);
-            if(!folder.isPresent()) {
-                throw new NotFoundException("No hay ninguna carpeta con ese id");
-            }
+            // FIND & MAP
+            Folder folder = this.service.findById(id);
+            folderDTO = folderMapper.entityToDto(folder);
 
-            folderDTO = folderMapper.entityToDto(folder.get());
-
+            // ERROR
         } catch (NotFoundException ex) {
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", folderDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Get folders by id_user "/folder/{id_user}"
@@ -110,21 +115,22 @@ public class FolderController {
      * @return List<FolderDTO>
      */
     @GetMapping("byUser/{id_user}")
-    public ResponseEntity<?> getAllFolders(@PathVariable Integer id_user) {
+    public ResponseEntity<?> getAllFolders(
+            @PathVariable Integer id_user
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         List<FolderDTO> allDTO;
 
         try {
-            Optional<List<Folder>> all = this.service.getAllByUser(id_user);
-            if(!all.isPresent()) throw new NotFoundException("Este usuario no tiene carpetas");
-
-            allDTO = all.get().stream()
+            // FIND && MAP
+            List<Folder> all = this.service.getAllByUser(id_user);
+            allDTO = all.stream()
                     .map(folderMapper::entityToDto)
                     .collect(Collectors.toList());
 
+            // ERROR
         } catch (NotFoundException ex) {
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
@@ -132,11 +138,14 @@ public class FolderController {
                     .body(res);
         }
 
+        // SUCCESS
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", allDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Post de folder "/folder/{id_user}"
@@ -145,40 +154,42 @@ public class FolderController {
      * @return FolderDTO
      */
     @PostMapping("/{id_user}")
-    public ResponseEntity<?> newFolder(@RequestBody Folder folder, @PathVariable Integer id_user) {
+    public ResponseEntity<?> newFolder(
+            @RequestBody Folder folder,
+            @PathVariable Integer id_user
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         FolderDTO folderDTO;
 
         try {
-            Optional<User> user = this.userService.findById(id_user);
-
-            if(!user.isPresent()){
-                throw new NotFoundException("hubo un problema, no se encontró el usuario");
-            }
-            folder.setUser(user.orElseThrow());
+            // FIND
+            User user = this.userService.findById(id_user);
+            // SET & POST
+            folder.setUser(user);
             Folder newFolder = this.service.save(folder);
-
+            // MAP
             folderDTO = folderMapper.entityToDto(newFolder);
+
+            // ERROR
         } catch (NotFoundException ex) {
-
             log.error("newFolder - Usuario no encontrado");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         log.info("newFolder - " + folderDTO.toString());
-
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.CREATED);
         res.put("data", folderDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Update Folder "/folder/{id}"
@@ -187,41 +198,45 @@ public class FolderController {
      * @return FolderDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateFolder(@PathVariable Integer id, @RequestBody Folder folder) {
+    public ResponseEntity<?> updateFolder(
+            @PathVariable Integer id,
+            @RequestBody Folder folder
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
         FolderDTO folderDTO;
 
         try {
-            Optional<Folder> folderToUpdate = this.service.findById(id);
-            if(!folderToUpdate.isPresent()) throw new NotFoundException("La carpeta no existe");
+            // FIND
+            Folder folderToUpdate = this.service.findById(id);
 
-            folder.setUser(folderToUpdate.get().getUser());
-            folder.setRoles(folderToUpdate.get().getRoles());
-            folder.setPages(folderToUpdate.get().getPages());
-
+            // SET & POST
+            folder.setUser(folderToUpdate.getUser());
+            folder.setRoles(folderToUpdate.getRoles());
+            folder.setPages(folderToUpdate.getPages());
             Folder updated = this.service.save(folder);
+            // MAP
             folderDTO = folderMapper.entityToDto(updated);
 
+            // ERROR
         } catch (NotFoundException ex){
             log.error("updateFolder - Carpeta inexistente");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         log.info("updateFolder: " + folderDTO.toString());
-
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
         res.put("data", folderDTO);
-
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Delete Folder "/folder/{id}"
@@ -229,37 +244,33 @@ public class FolderController {
      * @return ok
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteFolder(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteFolder(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-
-        Optional<Folder> folder;
+        Folder folder;
 
         try {
+            // FIND & DELETE
             folder = this.service.findById(id);
-            if(!folder.isPresent()) throw new NotFoundException("La carpeta no existe");
 
+            this.service.delete(folder);
 
-            this.service.delete(folder.orElseThrow());
-
+            // ERROR
         } catch (NotFoundException ex){
-
             log.error("deleteFolder - Carpeta no encontrada");
-
             res.put("success", Boolean.FALSE);
             res.put("status", HttpStatus.BAD_REQUEST);
             res.put("mensaje", ex.getMessage());
-
             return ResponseEntity.badRequest()
                     .body(res);
         }
 
+        // SUCCESS
         log.info("deleteFolder - " + id);
-
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.ACCEPTED);
-
         return ResponseEntity.ok(res);
     }
-
 }
-
