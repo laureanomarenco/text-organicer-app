@@ -1,7 +1,6 @@
 package com.textorganicer.servicios.impl;
 
 import com.textorganicer.excepciones.NotFoundException;
-import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.respositorios.UserPrivateRepository;
 import com.textorganicer.servicios.UserPrivateService;
@@ -45,18 +44,15 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
     @Override
     public boolean validate(UserPrivate userToValidate, UserPrivate userInDB) {
-        if(HashGenerator.verifyPassword(
+        return HashGenerator.verifyPassword(
                 userToValidate.getPassword(),
                 userInDB.getSalt(),
-                userInDB.getPassword())) return true;
-
-        else return false;
+                userInDB.getPassword());
     }
 
     @Override
     public boolean exists(String mail) {
-        if(this.repository.findByMail(mail).isPresent()) return true;
-        else return false;
+        return this.repository.findByMail(mail).isPresent();
     }
 
     public UserPrivate findByMail(String mail) {

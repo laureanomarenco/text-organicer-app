@@ -33,7 +33,7 @@ public class PageServiceImpl implements PageService {
     @Override
     public List<Page> getAllByFolder(Integer idFolder) {
         Optional<List<Page>> all = this.repository.getAllByFolder(idFolder);
-        if(!all.isPresent()) throw new NotFoundException("No hay páginas en esta carpeta");
+        if(all.isEmpty()) throw new NotFoundException("No hay páginas en esta carpeta");
 
         return all.get();
     }

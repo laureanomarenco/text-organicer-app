@@ -80,7 +80,9 @@ public class PageController {
      * @return PageDTO
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPageById(@PathVariable Integer id) {
+    public ResponseEntity<?> getPageById(
+            @PathVariable Integer id
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         PageDTO pageDTO;
@@ -113,7 +115,9 @@ public class PageController {
      * @return List<PageDTO>
      */
     @GetMapping("byFolder/{id_folder}")
-    public ResponseEntity<?> getAllPages(@PathVariable Integer id_folder) {
+    public ResponseEntity<?> getAllPages(
+            @PathVariable Integer id_folder
+    ) {
         // CONSTANT  OBJECTS
         Map<String, Object> res = new HashMap<>();
         List<PageDTO> allDTO;
@@ -149,7 +153,10 @@ public class PageController {
      * @return PageDTO
      */
     @PostMapping("/{id_folder}")
-    public ResponseEntity<?> newPage(@RequestBody Page page, @PathVariable Integer id_folder) {
+    public ResponseEntity<?> newPage(
+            @RequestBody Page page,
+            @PathVariable Integer id_folder
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         PageDTO newPageDTO;
@@ -188,7 +195,10 @@ public class PageController {
      * @return pageDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePage(@PathVariable Integer id, @RequestBody Page page) {
+    public ResponseEntity<?> updatePage(
+            @PathVariable Integer id,
+            @RequestBody Page page
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         PageDTO pageDTO;
@@ -226,7 +236,9 @@ public class PageController {
      * @return ok
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePage(@PathVariable Integer id) {
+    public ResponseEntity<?> deletePage(
+            @PathVariable Integer id
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         Page page;

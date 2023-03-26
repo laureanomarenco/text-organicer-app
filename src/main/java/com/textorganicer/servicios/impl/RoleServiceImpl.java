@@ -26,7 +26,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role findById(Integer id) {
         Optional<Role> role = this.repository.findById(id);
-        if (!role.isPresent()) throw new NotFoundException("No hay ningún rol con ese id");
+        if (role.isEmpty()) throw new NotFoundException("No hay ningún rol con ese id");
 
         return role.get();
     }
@@ -34,7 +34,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> getAllByFolderId(Integer id_folder) {
         Optional<List<Role>> roles= this.repository.getAllByFolderId(id_folder);
-        if (!roles.isPresent()) throw new NotFoundException("Esta carpeta no tiene roles");
+        if (roles.isEmpty()) throw new NotFoundException("Esta carpeta no tiene roles");
 
         return roles.get();
     }
@@ -42,7 +42,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> findShared(Integer idUser) {
         Optional<List<Role>> roles= this.repository.findShared(idUser);
-        if (!roles.isPresent()) throw new NotFoundException("Ese usuario no tiene roles");
+        if (roles.isEmpty()) throw new NotFoundException("Ese usuario no tiene roles");
 
         return roles.get();
     }
@@ -50,7 +50,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role findByUserAndFolder(Integer idUser, Integer idFolder) {
         Optional<Role> role = this.repository.findByIdAndFolder(idUser, idFolder);
-        if (!role.isPresent()) throw new NotFoundException("No hay roles");
+        if (role.isEmpty()) throw new NotFoundException("No hay roles");
 
         return role.get();
     }

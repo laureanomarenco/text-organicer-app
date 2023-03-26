@@ -3,7 +3,6 @@ package com.textorganicer.utils;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 
 public class HashGenerator {
 
@@ -15,7 +14,7 @@ public class HashGenerator {
 
     public static String addSaltToPassword(String password, byte[] salt) {
         StringBuilder sb = new StringBuilder();
-        sb.append(new String(salt, StandardCharsets.UTF_8)); // Agregar la salt al inicio de la contraseña
+        sb.append(new String(salt, StandardCharsets.UTF_8));
         sb.append(password);
         return sb.toString();
     }

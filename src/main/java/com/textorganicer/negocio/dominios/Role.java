@@ -1,13 +1,11 @@
 package com.textorganicer.negocio.dominios;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-//#TODO Generar controller servicios y repo.
 
 @Entity
 @Table(name = "Role")

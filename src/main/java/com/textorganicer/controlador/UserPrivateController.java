@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class UserPrivateController {
 
     private final UserPrivateMapper userPrivateMapper;
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
     private final UserPrivateService service;
     private final UserService userService;
 
@@ -174,93 +174,14 @@ public class UserPrivateController {
 
 
     /**
-     * updateUserPrivate "/user_private/{id}"
-     * @param id
-     * @param userPrivate
-     * @return UserPrivateDTO
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUserPrivate(
-            @PathVariable Integer id,
-            @RequestBody UserPrivate userPrivate
-    ) {
-        //CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivateDTO updatedDTO;
-
-        try {
-            // FIND & SET
-            UserPrivate userToUpdate = this.service.findById(id);
-            userPrivate.setSalt(userToUpdate.getSalt());
-            userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
-            userPrivate.setUser(userToUpdate.getUser());
-
-            // SAVE & MAP
-            UserPrivate updated = this.service.save(userPrivate);
-            updatedDTO = userPrivateMapper.entityToDto(updated);
-
-            // ERROR
-        } catch (NotFoundException ex){
-            log.error("updatePrivateUser - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
-        log.info("updatePrivateUser - " + updatedDTO.toString());
-        res.put("status", HttpStatus.ACCEPTED);
-        res.put("success", Boolean.TRUE);
-        res.put("data", updatedDTO);
-        return ResponseEntity.ok(res);
-    }
-
-
-
-    /**
-     * deleteUserPrivate "/user_private/{id}"
-     * @param id
-     * @return ok
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUserPrivate(@PathVariable Integer id) {
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivate userPrivate;
-
-        try {
-            // FIND & DELETE
-            userPrivate = this.service.findById(id);
-            this.service.delete(userPrivate);
-
-            // ERROR
-        } catch (NotFoundException ex){
-            log.error("deleteUserPrivate - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
-        log.info("deleteUserPrivate - " + id);
-        res.put("success", Boolean.TRUE);
-        res.put("status", HttpStatus.OK);
-        return ResponseEntity.ok(res);
-    }
-
-
-
-    /**
      * "/login"
      * @param userPrivate
      * @return UserDTO
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserPrivate userPrivate) {
+    public ResponseEntity<?> login(
+            @RequestBody UserPrivate userPrivate
+    ) {
         Map<String, Object> res = new HashMap<>();
 
         UserDTO validatedUserDTO;
@@ -312,6 +233,89 @@ public class UserPrivateController {
         res.put("success", Boolean.TRUE);
         res.put("status", HttpStatus.OK);
         res.put("data", validatedUserDTO);
+        return ResponseEntity.ok(res);
+    }
+
+
+
+    /**
+     * updateUserPrivate "/user_private/{id}"
+     * @param id
+     * @param userPrivate
+     * @return UserPrivateDTO
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUserPrivate(
+            @PathVariable Integer id,
+            @RequestBody UserPrivate userPrivate
+    ) {
+        //CONSTANT OBJECTS
+        Map<String, Object> res = new HashMap<>();
+        UserPrivateDTO updatedDTO;
+
+        try {
+            // FIND & SET
+            UserPrivate userToUpdate = this.service.findById(id);
+            userPrivate.setSalt(userToUpdate.getSalt());
+            userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
+            userPrivate.setUser(userToUpdate.getUser());
+
+            // SAVE & MAP
+            UserPrivate updated = this.service.save(userPrivate);
+            updatedDTO = userPrivateMapper.entityToDto(updated);
+
+            // ERROR
+        } catch (NotFoundException ex){
+            log.error("updatePrivateUser - " + ex.getMessage());
+            res.put("status", HttpStatus.BAD_REQUEST);
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        // SUCCESS
+        log.info("updatePrivateUser - " + updatedDTO.toString());
+        res.put("status", HttpStatus.ACCEPTED);
+        res.put("success", Boolean.TRUE);
+        res.put("data", updatedDTO);
+        return ResponseEntity.ok(res);
+    }
+
+
+
+    /**
+     * deleteUserPrivate "/user_private/{id}"
+     * @param id
+     * @return ok
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUserPrivate(
+            @PathVariable Integer id
+    ) {
+        // CONSTANT OBJECTS
+        Map<String, Object> res = new HashMap<>();
+        UserPrivate userPrivate;
+
+        try {
+            // FIND & DELETE
+            userPrivate = this.service.findById(id);
+            this.service.delete(userPrivate);
+
+            // ERROR
+        } catch (NotFoundException ex){
+            log.error("deleteUserPrivate - " + ex.getMessage());
+            res.put("status", HttpStatus.BAD_REQUEST);
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        // SUCCESS
+        log.info("deleteUserPrivate - " + id);
+        res.put("success", Boolean.TRUE);
+        res.put("status", HttpStatus.OK);
         return ResponseEntity.ok(res);
     }
 

@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 
 import org.junit.jupiter.api.BeforeEach;
 
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;

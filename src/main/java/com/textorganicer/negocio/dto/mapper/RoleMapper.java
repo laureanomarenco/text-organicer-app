@@ -1,8 +1,6 @@
 package com.textorganicer.negocio.dto.mapper;
 
-import com.textorganicer.negocio.dominios.Folder;
 import com.textorganicer.negocio.dominios.Role;
-import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dto.RoleDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

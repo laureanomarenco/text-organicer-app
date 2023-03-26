@@ -83,7 +83,9 @@ public class RoleController {
      * @return RoleDTO
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRoleById(@PathVariable Integer id) {
+    public ResponseEntity<?> getRoleById(
+            @PathVariable Integer id
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         RoleDTO roleDTO;
@@ -116,7 +118,9 @@ public class RoleController {
      * @return List<RoleDTO>
      */
     @GetMapping("/byUser/{id_user}")
-    public ResponseEntity<?> getAllByUserId(@PathVariable Integer id_user) {
+    public ResponseEntity<?> getAllByUserId(
+            @PathVariable Integer id_user
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         List<RoleDTO> allDTO;
@@ -151,7 +155,9 @@ public class RoleController {
      * @return List<RoleDTO>
      */
     @GetMapping("/byFolder/{id_folder}")
-    public ResponseEntity<?> getAllByFolderId(@PathVariable Integer id_folder) {
+    public ResponseEntity<?> getAllByFolderId(
+            @PathVariable Integer id_folder
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         List<RoleDTO> allDTO;
@@ -215,6 +221,8 @@ public class RoleController {
         res.put("data", roleDTO);
         return ResponseEntity.ok(res);
     }
+
+
 
     /**
      * Post de roles "/role?id_user=xxxx&id_folder=xxxx"
@@ -312,7 +320,9 @@ public class RoleController {
      * @return ok
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRole(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteRole(
+            @PathVariable Integer id
+    ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         Role role;

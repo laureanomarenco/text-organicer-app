@@ -1,6 +1,5 @@
 package com.textorganicer.negocio.dto.mapper;
 
-import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserPrivateDTO;
 import org.mapstruct.Mapper;

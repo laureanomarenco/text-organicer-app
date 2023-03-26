@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserController {
 
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
     private final UserService service;
 
     public UserController(UserMapper userMapper, UserService service) {
