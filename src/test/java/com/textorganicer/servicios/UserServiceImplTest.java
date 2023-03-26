@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 
 import org.junit.jupiter.api.BeforeEach;
 
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
@@ -22,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 public class UserServiceImplTest {
 
-    @Mock
     private UserRepository repository;
     private UserService service;
 
@@ -54,13 +52,14 @@ public class UserServiceImplTest {
     void getById() {
         //GIVEN
         when(repository.findById(1))
-                .thenReturn(Optional.of(DatosDummy.getUserUno()));
+                .thenReturn(Optional.of(DatosDummy.uno));
 
         //WHEN
-        Optional<User> user = service.findById(1);
+        service.save(DatosDummy.uno);
+        User user = service.findById(1);
 
         //THEN
-        assertThat(user.isPresent())
+        assertThat(user.equals(DatosDummy.uno))
                 .isTrue();
     }
 
@@ -68,15 +67,15 @@ public class UserServiceImplTest {
     void getByUsername() {
         //GIVEN
         when(repository.findByUsername("Usuario"))
-                .thenReturn(Optional.of(DatosDummy.getUserUno()));
+                .thenReturn(Optional.of(DatosDummy.uno));
 
         //WHEN
-        Optional<User> user = service.findByUsername("Usuario");
-
+        service.save(DatosDummy.uno);
+        User user = service.findByUsername("Usuario");
 
 
         //THEN
-        assertThat(user.isPresent())
+        assertThat(user.equals(DatosDummy.uno))
                 .isTrue();
 
     }
@@ -108,7 +107,7 @@ public class UserServiceImplTest {
                 .thenReturn(Optional.of(DatosDummy.getUserUno()));
 
         //WHEN
-        Optional<User> user = service.findByUsername("Usuario");
+        User user = service.findByUsername("Usuario");
         boolean exists = service.userExists("Usuario");
         boolean notExists = service.userExists("Invalido");
 
@@ -137,10 +136,10 @@ public class UserServiceImplTest {
                 .thenReturn(Optional.of(DatosDummy.uno));
 
         //WHEN
-        Optional<User> user = service.findByToken(DatosDummy.uno.getToken());
+        User user = service.findByToken(DatosDummy.uno.getToken());
 
         //THEN
-        assertThat(user.isPresent())
+        assertThat(user.equals(DatosDummy.uno))
                 .isTrue();
     }
 }

@@ -1,6 +1,6 @@
 package com.textorganicer.servicios.impl;
 
-import com.textorganicer.negocio.dominios.User;
+import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.respositorios.UserPrivateRepository;
 import com.textorganicer.servicios.UserPrivateService;
@@ -25,8 +25,11 @@ public class UserPrivateServiceImpl implements UserPrivateService {
     }
 
     @Override
-    public Optional<UserPrivate> findById(Integer id) {
-        return this.repository.findById(id);
+    public UserPrivate findById(Integer id) {
+        Optional<UserPrivate> userPrivate = this.repository.findById(id);
+        if(userPrivate.isEmpty()) throw new NotFoundException("No hay ningún usuario con ese id");
+
+        return userPrivate.get();
     }
 
     @Override
@@ -40,20 +43,21 @@ public class UserPrivateServiceImpl implements UserPrivateService {
     }
 
     @Override
-    public boolean validate(UserPrivate userToValidate, Optional<UserPrivate> userInDB) {
-        System.out.println(HashGenerator.verifyPassword(
+    public boolean validate(UserPrivate userToValidate, UserPrivate userInDB) {
+        return HashGenerator.verifyPassword(
                 userToValidate.getPassword(),
-                userInDB.orElseThrow().getSalt(),
-                userInDB.orElseThrow().getPassword()));
-        if(HashGenerator.verifyPassword(
-                userToValidate.getPassword(),
-                userInDB.orElseThrow().getSalt(),
-                userInDB.orElseThrow().getPassword())) return true;
-
-        else return false;
+                userInDB.getSalt(),
+                userInDB.getPassword());
     }
 
-    public Optional<UserPrivate> findByMail(String mail) {
-        return this.repository.findByMail(mail);
+    @Override
+    public boolean exists(String mail) {
+        return this.repository.findByMail(mail).isPresent();
+    }
+
+    public UserPrivate findByMail(String mail) {
+        Optional<UserPrivate> userPrivate = this.repository.findByMail(mail);
+        if(userPrivate.isEmpty()) throw new NotFoundException("Mail no encontrado");
+        return userPrivate.get();
     }
 }

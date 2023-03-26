@@ -1,5 +1,6 @@
 package com.textorganicer.servicios.impl;
 
+import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.Page;
 import com.textorganicer.respositorios.PageRepository;
 import com.textorganicer.servicios.PageService;
@@ -23,13 +24,18 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public Optional<Page> findById(Integer id) {
-        return this.repository.findById(id);
+    public Page findById(Integer id) {
+        Optional<Page> page = this.repository.findById(id);
+        if (page.isEmpty()) throw new NotFoundException("No hay ninguna página con ese id");
+        return page.get();
     }
 
     @Override
-    public Optional<List<Page>> getAllByFolder(Integer idFolder) {
-        return this.repository.getAllByFolder(idFolder);
+    public List<Page> getAllByFolder(Integer idFolder) {
+        Optional<List<Page>> all = this.repository.getAllByFolder(idFolder);
+        if(all.isEmpty()) throw new NotFoundException("No hay páginas en esta carpeta");
+
+        return all.get();
     }
 
     @Override
