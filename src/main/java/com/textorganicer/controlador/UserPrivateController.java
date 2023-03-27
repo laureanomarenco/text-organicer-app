@@ -5,6 +5,7 @@ import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserDTO;
+import com.textorganicer.negocio.dto.UserEmailUpdate;
 import com.textorganicer.negocio.dto.UserPrivateDTO;
 import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
@@ -19,11 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -128,7 +129,7 @@ public class UserPrivateController {
      */
     @PostMapping("/{user_id}")
     public ResponseEntity<?> newUserPrivate(
-            @RequestBody UserPrivate userPrivate,
+            @Valid @RequestBody UserPrivate userPrivate,
             @PathVariable Integer user_id
     ) {
         // CONSTANT OBJECTS
@@ -180,7 +181,7 @@ public class UserPrivateController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @RequestBody UserPrivate userPrivate
+            @Valid @RequestBody UserPrivate userPrivate
     ) {
         Map<String, Object> res = new HashMap<>();
 
@@ -247,7 +248,7 @@ public class UserPrivateController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUserPrivate(
             @PathVariable Integer id,
-            @RequestBody UserPrivate userPrivate
+            @Valid @RequestBody UserPrivate userPrivate
     ) {
         //CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
@@ -259,7 +260,6 @@ public class UserPrivateController {
             userPrivate.setSalt(userToUpdate.getSalt());
             userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
             userPrivate.setUser(userToUpdate.getUser());
-
             // SAVE & MAP
             UserPrivate updated = this.service.save(userPrivate);
             updatedDTO = userPrivateMapper.entityToDto(updated);
@@ -276,6 +276,43 @@ public class UserPrivateController {
 
         // SUCCESS
         log.info("updatePrivateUser - " + updatedDTO.toString());
+        res.put("status", HttpStatus.ACCEPTED);
+        res.put("success", Boolean.TRUE);
+        res.put("data", updatedDTO);
+        return ResponseEntity.ok(res);
+    }
+
+
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateUserEmail(
+            @PathVariable Integer id,
+            @Valid @RequestBody UserEmailUpdate userEmailUpdate
+    ) {
+        // CONSTANT OBJECTS
+        Map<String, Object> res = new HashMap<>();
+        UserPrivateDTO updatedDTO;
+
+        try {
+            // FIND & SET
+            UserPrivate userToUpdate = this.service.findById(id);
+            userToUpdate.setMail(userEmailUpdate.getMail());
+            // SAVE & MAP
+            UserPrivate updated = this.service.save(userToUpdate);
+            updatedDTO = userPrivateMapper.entityToDto(updated);
+
+            // ERROR
+        } catch (NotFoundException ex){
+            log.error("updateUserEmail - " + ex.getMessage());
+            res.put("status", HttpStatus.BAD_REQUEST);
+            res.put("success", Boolean.FALSE);
+            res.put("mensaje", ex.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(res);
+        }
+
+        // SUCCESS
+        log.info("updateUserEmail - " + updatedDTO.toString());
         res.put("status", HttpStatus.ACCEPTED);
         res.put("success", Boolean.TRUE);
         res.put("data", updatedDTO);
