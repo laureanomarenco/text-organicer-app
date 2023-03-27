@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -151,7 +152,7 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<?> newUser(
-            @RequestBody User user
+            @Valid @RequestBody User user
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
@@ -198,7 +199,9 @@ public class UserController {
      * @return UserDTO
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(
+            @PathVariable Integer id,
+            @Valid @RequestBody User user) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
         UserDTO userDTO;
