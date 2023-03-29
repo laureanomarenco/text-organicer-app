@@ -16,9 +16,9 @@ public class Folder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "nombre", length = 100, unique = true, nullable = false)
+    @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
-    @Column(name = "is_public", unique = true, nullable = false)
+    @Column(name = "is_public", nullable = false)
     private String is_public;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**----------------------------------------------
@@ -149,26 +148,25 @@ public class FolderController {
 
     /**
      * Post de folder "/folder/{id_user}"
-     * @param folder
+     * @param folderDTO
      * @param id_user
      * @return FolderDTO
      */
     @PostMapping("/{id_user}")
     public ResponseEntity<?> newFolder(
-            @RequestBody Folder folder,
+            @RequestBody FolderDTO folderDTO,
             @PathVariable Integer id_user
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        FolderDTO folderDTO;
 
         try {
-            // FIND
+            // SET, MAPS & POST
+            Folder folder = folderMapper.dtoToEntity(folderDTO);
             User user = this.userService.findById(id_user);
-            // SET & POST
             folder.setUser(user);
+
             Folder newFolder = this.service.save(folder);
-            // MAP
             folderDTO = folderMapper.entityToDto(newFolder);
 
             // ERROR
@@ -194,23 +192,23 @@ public class FolderController {
     /**
      * Update Folder "/folder/{id}"
      * @param id
-     * @param folder
+     * @param folderDTO
      * @return FolderDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateFolder(
             @PathVariable Integer id,
-            @RequestBody Folder folder
+            @RequestBody FolderDTO folderDTO
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        FolderDTO folderDTO;
 
         try {
             // FIND
             Folder folderToUpdate = this.service.findById(id);
 
             // SET & POST
+            Folder folder = this.folderMapper.dtoToEntity(folderDTO);
             folder.setUser(folderToUpdate.getUser());
             folder.setRoles(folderToUpdate.getRoles());
             folder.setPages(folderToUpdate.getPages());

@@ -148,13 +148,13 @@ public class PageController {
 
     /**
      * Post de page "/page/{id_folder}"
-     * @param page
+     * @param pageDTO
      * @param id_folder
      * @return PageDTO
      */
     @PostMapping("/{id_folder}")
     public ResponseEntity<?> newPage(
-            @RequestBody Page page,
+            @RequestBody PageDTO pageDTO,
             @PathVariable Integer id_folder
     ) {
         // CONSTANT OBJECTS
@@ -164,6 +164,7 @@ public class PageController {
         try {
             // FIND & SET
             Folder folder = this.folderService.findById(id_folder);
+            Page page = this.pageMapper.dtoToEntity(pageDTO);
             page.setFolder(folder);
             // SAVE & MAP
             Page newPage = this.service.save(page);
@@ -191,21 +192,22 @@ public class PageController {
     /**
      * Update Page "/page/{id}"
      * @param id
-     * @param page
+     * @param pageDTO
      * @return pageDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePage(
             @PathVariable Integer id,
-            @RequestBody Page page
+            @RequestBody PageDTO pageDTO
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        PageDTO pageDTO;
+        //PageDTO pageDTO;
 
         try {
             // FIND & SET
             Page pageToUpdate = this.service.findById(id);
+            Page page = this.pageMapper.dtoToEntity(pageDTO);
             page.setFolder(pageToUpdate.getFolder());
             // SAVE & MAP
             Page updated = this.service.save(page);

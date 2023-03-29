@@ -5,7 +5,7 @@ import com.textorganicer.excepciones.NotFoundException;
 import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserDTO;
-import com.textorganicer.negocio.dto.UserEmailUpdate;
+import com.textorganicer.negocio.dto.UserEmailUpdateDTO;
 import com.textorganicer.negocio.dto.UserPrivateDTO;
 import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
@@ -123,13 +123,13 @@ public class UserPrivateController {
 
     /**
      * Post userPrivate "/user_private/{user_id}
-     * @param userPrivate
+     * @param userPrivateDTO
      * @param user_id
      * @return UserPrivateDTO
      */
     @PostMapping("/{user_id}")
     public ResponseEntity<?> newUserPrivate(
-            @Valid @RequestBody UserPrivate userPrivate,
+            @Valid @RequestBody UserPrivateDTO userPrivateDTO,
             @PathVariable Integer user_id
     ) {
         // CONSTANT OBJECTS
@@ -138,6 +138,7 @@ public class UserPrivateController {
 
         try {
             // VALIDATE
+            UserPrivate userPrivate = userPrivateMapper.dtoToEntity(userPrivateDTO);
             if(this.service.exists(userPrivate.getMail())) throw new RuntimeException("Ya existe un usuario con ese mail");
 
             // FIND & SET
@@ -176,18 +177,19 @@ public class UserPrivateController {
 
     /**
      * "/login"
-     * @param userPrivate
+     * @param userPrivateDTO
      * @return UserDTO
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(
-            @Valid @RequestBody UserPrivate userPrivate
+            @Valid @RequestBody UserPrivateDTO userPrivateDTO
     ) {
         Map<String, Object> res = new HashMap<>();
 
         UserDTO validatedUserDTO;
 
         try {
+            UserPrivate userPrivate = userPrivateMapper.dtoToEntity(userPrivateDTO);
             UserPrivate userToValidate = this.service.findByMail(userPrivate.getMail());
 
 
@@ -214,7 +216,7 @@ public class UserPrivateController {
 
             res.put("status", HttpStatus.UNAUTHORIZED);
             res.put("success", Boolean.FALSE);
-            res.put("message", ex.getMessage());
+            res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
@@ -223,7 +225,7 @@ public class UserPrivateController {
 
             res.put("status", HttpStatus.UNAUTHORIZED);
             res.put("success", Boolean.FALSE);
-            res.put("message", ex.getMessage());
+            res.put("mensaje", ex.getMessage());
 
             return ResponseEntity.badRequest()
                     .body(res);
@@ -242,13 +244,13 @@ public class UserPrivateController {
     /**
      * updateUserPrivate "/user_private/{id}"
      * @param id
-     * @param userPrivate
+     * @param userPrivateDTO
      * @return UserPrivateDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUserPrivate(
             @PathVariable Integer id,
-            @Valid @RequestBody UserPrivate userPrivate
+            @Valid @RequestBody UserPrivateDTO userPrivateDTO
     ) {
         //CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
@@ -256,6 +258,7 @@ public class UserPrivateController {
 
         try {
             // FIND & SET
+            UserPrivate userPrivate = userPrivateMapper.dtoToEntity(userPrivateDTO);
             UserPrivate userToUpdate = this.service.findById(id);
             userPrivate.setSalt(userToUpdate.getSalt());
             userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
@@ -283,11 +286,16 @@ public class UserPrivateController {
     }
 
 
-
+    /**
+     * updateUserPrivate "/user_private/{id}"
+     * @param id
+     * @param userEmailUpdateDTO
+     * @return UserPrivateDTO
+     */
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateUserEmail(
             @PathVariable Integer id,
-            @Valid @RequestBody UserEmailUpdate userEmailUpdate
+            @Valid @RequestBody UserEmailUpdateDTO userEmailUpdateDTO
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
@@ -296,7 +304,7 @@ public class UserPrivateController {
         try {
             // FIND & SET
             UserPrivate userToUpdate = this.service.findById(id);
-            userToUpdate.setMail(userEmailUpdate.getMail());
+            userToUpdate.setMail(userEmailUpdateDTO.getMail());
             // SAVE & MAP
             UserPrivate updated = this.service.save(userToUpdate);
             updatedDTO = userPrivateMapper.entityToDto(updated);

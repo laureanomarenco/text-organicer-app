@@ -2,6 +2,7 @@ package com.textorganicer.negocio.dto.mapper;
 
 import com.textorganicer.negocio.dominios.Role;
 import com.textorganicer.negocio.dto.RoleDTO;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -12,8 +13,7 @@ public interface RoleMapper {
     @Mapping(source = "folder.id", target = "id_folder")
     RoleDTO entityToDto(Role entity);
 
-    @Mapping(source = "id_user", target = "user.id")
-    @Mapping(source = "id_folder", target = "folder.id")
+    @InheritInverseConfiguration
     Role dtoToEntity(RoleDTO dto);
 
 }
