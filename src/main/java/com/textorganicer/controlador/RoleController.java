@@ -226,14 +226,14 @@ public class RoleController {
 
     /**
      * Post de roles "/role?id_user=xxxx&id_folder=xxxx"
-     * @param role
+     * @param roleDTO
      * @param id_user
      * @param id_folder
      * @return
      */
     @PostMapping
     public ResponseEntity<?> newRole(
-            @RequestBody Role role,
+            @RequestBody RoleDTO roleDTO,
             @RequestParam Integer id_user,
             @RequestParam Integer id_folder
     ) {
@@ -245,6 +245,8 @@ public class RoleController {
             // FIND & SET
             User user = this.userService.findById(id_user);
             Folder folder = this.folderService.findById(id_folder);
+
+            Role role = this.roleMapper.dtoToEntity(roleDTO);
             role.setUser(user);
             role.setFolder(folder);
 
@@ -274,21 +276,21 @@ public class RoleController {
     /**
      * Update de role "/role/{id}"
      * @param id
-     * @param role
+     * @param roleDTO
      * @return RoleDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRole(
             @PathVariable Integer id,
-            @RequestBody Role role
+            @RequestBody RoleDTO roleDTO
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        RoleDTO roleDTO;
 
         try {
             // FIND & SET
             Role roleToUpdate = this.service.findById(id);
+            Role role = this.roleMapper.dtoToEntity(roleDTO);
             role.setUser(roleToUpdate.getUser());
             role.setFolder(roleToUpdate.getFolder());
             // SAVE & MAP

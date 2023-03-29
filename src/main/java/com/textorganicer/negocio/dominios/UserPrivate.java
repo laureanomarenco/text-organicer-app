@@ -5,10 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 @Entity
 @Table(name = "user_private")
@@ -21,14 +17,9 @@ public class UserPrivate {
     private Integer id;
 
     @Column(name = "mail", length = 100, unique = true, nullable = false)
-    @NotBlank(message = "El mail no puede estar vacío")
-    @NotNull(message = "El mail no puede ser nulo")
-    @Email(message = "El mail debe tener un formato de email válido")
     private String mail;
 
     @Column(name = "password", unique = true, nullable = false)
-    @NotBlank(message = "El password no puede estar vacío")
-    @NotNull(message = "El password no puede ser nulo")
     private String password;
 
     @Lob

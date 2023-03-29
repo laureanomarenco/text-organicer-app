@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+
 /**
  * Controlador de User "/user"
  */
@@ -27,10 +29,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 @Slf4j
 public class UserController {
-
     private final UserMapper userMapper;
     private final UserService service;
-
     public UserController(UserMapper userMapper, UserService service) {
         this.userMapper = userMapper;
         this.service = service;
@@ -147,12 +147,12 @@ public class UserController {
 
     /**
      * Post de User "/user"
-     * @param user
+     * @param userDTO
      * @return UserPostDTO
      */
     @PostMapping
     public ResponseEntity<?> newUser(
-            @Valid @RequestBody User user
+            @Valid @RequestBody UserDTO userDTO
     ) {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
@@ -160,6 +160,7 @@ public class UserController {
 
         try {
             // VALIDATE
+            User user = userMapper.DtoToEntity(userDTO);
             if(this.service.userExists(user.getUsername())) throw new RuntimeException("El username ya existe");
 
             // SET
@@ -195,20 +196,21 @@ public class UserController {
     /**
      *
      * @param id
-     * @param user
+     * @param userDTO
      * @return UserDTO
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(
             @PathVariable Integer id,
-            @Valid @RequestBody User user) {
+            @Valid @RequestBody UserDTO userDTO)
+    {
         // CONSTANT OBJECTS
         Map<String, Object> res = new HashMap<>();
-        UserDTO userDTO;
 
         try {
             // FIND & SET
             User userToUpdate = this.service.findById(id);
+            User user = userMapper.DtoToEntity(userDTO);
 
             user.setUserPrivate(userToUpdate.getUserPrivate());
             user.setRoles(userToUpdate.getRoles());

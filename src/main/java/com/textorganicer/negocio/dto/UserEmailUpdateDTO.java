@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEmailUpdate {
+public class UserEmailUpdateDTO {
     Integer id;
     String mail;
 }

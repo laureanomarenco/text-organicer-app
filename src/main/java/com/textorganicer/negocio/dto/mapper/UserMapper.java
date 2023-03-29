@@ -48,8 +48,15 @@ public class UserMapper {
         entity.setId(dto.getId());
         entity.setUsername(dto.getUsername());
         entity.setImagen(dto.getImagen());
-        UserPrivate userPrivate = new UserPrivate();
-        entity.setUserPrivate(userPrivate);
+
+        return entity;
+    }
+
+    public static User PostDtoToEntity(UserPostDTO dto) {
+        User entity = new User();
+        entity.setUsername(dto.getUsername());
+        entity.setImagen(dto.getImagen());
+
         return entity;
     }
 }

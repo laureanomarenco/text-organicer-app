@@ -23,9 +23,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "username", length = 16, unique = true, nullable = false)
-    @NotBlank(message = "El username no puede estar vacío")
-    @NotNull(message = "El username no puede ser nulo")
-    @Size(min = 4, max = 16, message = "El username debe tener entre 4 y 16 caracteres")
     private String username;
     @Column(name = "imagen")
     private String imagen;

@@ -50,11 +50,10 @@ public class UserServiceImplTest {
 
     @Test
     void getById() {
-        //GIVEN
+        //WHEN
         when(repository.findById(1))
                 .thenReturn(Optional.of(DatosDummy.uno));
 
-        //WHEN
         service.save(DatosDummy.uno);
         User user = service.findById(1);
 
@@ -65,11 +64,10 @@ public class UserServiceImplTest {
 
     @Test
     void getByUsername() {
-        //GIVEN
+        //WHEN
         when(repository.findByUsername("Usuario"))
                 .thenReturn(Optional.of(DatosDummy.uno));
 
-        //WHEN
         service.save(DatosDummy.uno);
         User user = service.findByUsername("Usuario");
 
@@ -102,11 +100,11 @@ public class UserServiceImplTest {
 
     @Test
     void userExists() {
-        //GIVEN
+
+        //WHEN
         when(repository.findByUsername("Usuario"))
                 .thenReturn(Optional.of(DatosDummy.getUserUno()));
 
-        //WHEN
         User user = service.findByUsername("Usuario");
         boolean exists = service.userExists("Usuario");
         boolean notExists = service.userExists("Invalido");
@@ -131,11 +129,9 @@ public class UserServiceImplTest {
 
     @Test
     void getByToken() {
-        //GIVEN
+        //WHEN
         when(repository.findByToken(DatosDummy.uno.getToken()))
                 .thenReturn(Optional.of(DatosDummy.uno));
-
-        //WHEN
         User user = service.findByToken(DatosDummy.uno.getToken());
 
         //THEN
