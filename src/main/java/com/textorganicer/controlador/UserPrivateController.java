@@ -40,7 +40,7 @@ public class UserPrivateController {
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", this.service.getAll()));
+                        "data", service.getAll()));
     }
 
 
@@ -57,7 +57,7 @@ public class UserPrivateController {
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", this.service.findById(id)));
+                        "data", service.findById(id)));
     }
 
 
@@ -72,13 +72,11 @@ public class UserPrivateController {
             @Valid @RequestBody UserPrivate userPrivate,
             @PathVariable Integer user_id
     ) {
-        UserPrivateDTO newUserPrivateDTO = this.service.save(user_id, userPrivate);
-        log.info("postUserPrivate - " + newUserPrivateDTO.toString());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", newUserPrivateDTO));
+                        "data", service.save(user_id, userPrivate)));
     }
 
 
@@ -91,13 +89,11 @@ public class UserPrivateController {
     public ResponseEntity<?> login(
             @Valid @RequestBody UserPrivate userPrivate
     ) {
-        UserDTO userValid = this.service.validate(userPrivate);
-        log.info("login - " + userValid.toString());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", userValid));
+                        "data", this.service.validate(userPrivate)));
     }
 
 
@@ -112,13 +108,11 @@ public class UserPrivateController {
             @PathVariable Integer id,
             @Valid @RequestBody UserPrivate userPrivate
     ) {
-        UserPrivateDTO updatedDTO = this.service.save(userPrivate, id);
-        log.info("updatePrivateUser - " + updatedDTO.toString());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", updatedDTO));
+                        "data", this.service.save(userPrivate, id)));
     }
 
 
@@ -127,13 +121,11 @@ public class UserPrivateController {
             @PathVariable Integer id,
             @Valid @RequestBody UserEmailUpdate userEmailUpdate
     ) {
-        UserPrivateDTO updatedDTO = this.service.save(userEmailUpdate, id);
-        log.info("updateUserEmail - " + updatedDTO.toString());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", updatedDTO));
+                        "data", this.service.save(userEmailUpdate, id)));
     }
 
 
@@ -146,11 +138,9 @@ public class UserPrivateController {
     public ResponseEntity<?> deleteUserPrivate(
             @PathVariable Integer id
     ) {
-        this.service.delete(id);
-        log.info("deleteUserPrivate - " + id);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of("success", true));
+                .body(Map.of("success", this.service.delete(id)));
     }
 
 }

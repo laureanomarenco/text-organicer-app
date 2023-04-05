@@ -14,7 +14,7 @@ public interface UserPrivateService {
     UserPrivateDTO save(Integer idUser, UserPrivate userPrivate);
     UserPrivateDTO save(UserPrivate userPrivate, Integer idToUpdate);
     UserPrivateDTO save(UserEmailUpdate userPrivate, Integer idToUpdate);
-    void delete(Integer id);
+    boolean delete(Integer id);
     UserDTO validate(UserPrivate userToValidate);
     boolean exists(String mail);
 }

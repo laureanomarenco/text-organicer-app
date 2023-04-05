@@ -16,6 +16,7 @@ import com.textorganicer.utils.HashGenerator;
 import com.textorganicer.utils.SaltGenerator;
 import com.textorganicer.utils.TokenGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserPrivateServiceImpl implements UserPrivateService {
     private final UserPrivateRepository repository;
     private final UserPrivateMapper mapper;
@@ -61,6 +63,8 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
         userPrivate.setUser(user);
 
+        UserPrivateDTO newUserPrivateDTO = mapper.entityToDto(this.repository.save(userPrivate));
+        log.info("postUserPrivate - " + newUserPrivateDTO.toString());
         return mapper.entityToDto(this.repository.save(userPrivate));
     }
 
@@ -74,7 +78,9 @@ public class UserPrivateServiceImpl implements UserPrivateService {
         userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
         userPrivate.setUser(userToUpdate.getUser());
 
-        return mapper.entityToDto(this.repository.save(userPrivate));
+        UserPrivateDTO updaterUserDTO = mapper.entityToDto(this.repository.save(userPrivate));
+        log.info("updatePrivateUser - " + updaterUserDTO.toString());
+        return updaterUserDTO;
     }
 
     @Override
@@ -84,17 +90,20 @@ public class UserPrivateServiceImpl implements UserPrivateService {
                 .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
 
         userToUpdate.setMail(userPrivate.getMail());
-        UserPrivate updated = this.repository
-                .save(userToUpdate);
-
-        return mapper.entityToDto(updated);
+        UserPrivateDTO updatedDTO = mapper.entityToDto(this.repository
+                .save(userToUpdate));
+        log.info("updateUserEmail - " + updatedDTO.toString());
+        return updatedDTO;
     }
 
     @Override
-    public void delete(Integer id) {
+    public boolean delete(Integer id) {
         this.repository.delete(this.repository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
+
+        log.info("deleteUserPrivate - " + id);
+        return true;
     }
 
     @Override
@@ -114,9 +123,10 @@ public class UserPrivateServiceImpl implements UserPrivateService {
         LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
         userValid.setTokenExpiration(expirationDate);
 
-        userValid = this.userService.save(userValid);
+        UserDTO userValidDTO = userMapper.entityToDto(this.userService.save(userValid));
 
-        return userMapper.entityToDto(userValid);
+        log.info("login - " + userValidDTO.toString());
+        return userValidDTO;
     }
 
     @Override
