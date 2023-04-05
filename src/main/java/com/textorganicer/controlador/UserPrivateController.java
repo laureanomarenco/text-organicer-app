@@ -1,31 +1,22 @@
 package com.textorganicer.controlador;
 
-import com.textorganicer.excepciones.AuthException;
-import com.textorganicer.excepciones.NotFoundException;
-import com.textorganicer.negocio.dominios.User;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserEmailUpdate;
 import com.textorganicer.negocio.dto.UserPrivateDTO;
-import com.textorganicer.negocio.dto.mapper.UserMapper;
-import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
+
 import com.textorganicer.servicios.UserPrivateService;
-import com.textorganicer.servicios.UserService;
-import com.textorganicer.utils.HashGenerator;
-import com.textorganicer.utils.SaltGenerator;
-import com.textorganicer.utils.TokenGenerator;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
-
 import javax.validation.Valid;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 /**
  * Controlador de UserPrivate "/user_private"
@@ -33,21 +24,10 @@ import java.util.stream.Collectors;
 @CrossOrigin("http://localhost:4200/")
 @RestController
 @RequestMapping("/user_private")
+@RequiredArgsConstructor
 @Slf4j
 public class UserPrivateController {
-
-    private final UserPrivateMapper userPrivateMapper;
-    private final UserMapper userMapper;
     private final UserPrivateService service;
-    private final UserService userService;
-
-    public UserPrivateController(UserPrivateMapper userPrivateMapper, UserMapper userMapper, UserPrivateService service, UserService userService) {
-        this.userPrivateMapper = userPrivateMapper;
-        this.userMapper = userMapper;
-        this.service = service;
-        this.userService = userService;
-    }
-
 
 
     /**
@@ -56,33 +36,12 @@ public class UserPrivateController {
      */
     @GetMapping
     public ResponseEntity<?> getAllUsersPrivate() {
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        List<UserPrivateDTO> allDTO;
-
-        try {
-            // GET & MAP
-            List<UserPrivate> all = this.service.getAll();
-            allDTO = all.stream()
-                    .map(userPrivateMapper::entityToDto)
-                    .collect(Collectors.toList());
-
-            // ERROR
-        } catch (RuntimeException ex) {
-            res.put("success", Boolean.FALSE);
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
-        res.put("success", Boolean.TRUE);
-        res.put("status", HttpStatus.OK);
-        res.put("data", allDTO);
-        return ResponseEntity.ok(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", this.service.getAll()));
     }
-
 
 
     /**
@@ -93,32 +52,13 @@ public class UserPrivateController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserPrivateById(
             @PathVariable Integer id
-    ){
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivateDTO userPrivateDTO;
-
-        try {
-            // FIND & MAP
-            UserPrivate userPrivate = this.service.findById(id);
-            userPrivateDTO = userPrivateMapper.entityToDto(userPrivate);
-
-            // ERROR
-        } catch (NotFoundException ex) {
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
-        res.put("success", Boolean.TRUE);
-        res.put("status", HttpStatus.OK);
-        res.put("data", userPrivateDTO);
-        return ResponseEntity.ok(res);
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", this.service.findById(id)));
     }
-
 
 
     /**
@@ -132,46 +72,14 @@ public class UserPrivateController {
             @Valid @RequestBody UserPrivate userPrivate,
             @PathVariable Integer user_id
     ) {
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivateDTO newUserPrivateDTO;
-
-        try {
-            // VALIDATE
-            if(this.service.exists(userPrivate.getMail())) throw new RuntimeException("Ya existe un usuario con ese mail");
-
-            // FIND & SET
-            User user = this.userService.findById(user_id);
-
-            byte[] salt = SaltGenerator.generateSalt();
-            userPrivate.setSalt(salt);
-            String hashedPassword = HashGenerator.hashPassword(userPrivate.getPassword(), salt);
-            userPrivate.setPassword(hashedPassword);
-
-            userPrivate.setUser(user);
-
-            // SAVE & MAP
-            UserPrivate newUserPrivate = this.service.save(userPrivate);
-            newUserPrivateDTO = userPrivateMapper.entityToDto(newUserPrivate);
-
-            // ERROR
-        } catch (RuntimeException ex){
-            log.error("postUserPrivate - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
+        UserPrivateDTO newUserPrivateDTO = this.service.save(user_id, userPrivate);
         log.info("postUserPrivate - " + newUserPrivateDTO.toString());
-        res.put("status", HttpStatus.CREATED);
-        res.put("success", Boolean.TRUE);
-        res.put("data", newUserPrivateDTO);
-        return ResponseEntity.ok(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", newUserPrivateDTO));
     }
-
 
 
     /**
@@ -183,60 +91,14 @@ public class UserPrivateController {
     public ResponseEntity<?> login(
             @Valid @RequestBody UserPrivate userPrivate
     ) {
-        Map<String, Object> res = new HashMap<>();
-
-        UserDTO validatedUserDTO;
-
-        try {
-            UserPrivate userToValidate = this.service.findByMail(userPrivate.getMail());
-
-
-            boolean isValid = this.service.validate(userPrivate, userToValidate);
-
-            User validatedUser;
-            if(!isValid) throw new AuthException("Password incorrecto");
-            else validatedUser = userToValidate.getUser();
-
-
-
-            String token = TokenGenerator.generateToken();
-            validatedUser.setToken(token);
-
-            LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
-            validatedUser.setTokenExpiration(expirationDate);
-
-            validatedUser = this.userService.save(validatedUser);
-
-            validatedUserDTO = userMapper.entityToDto(validatedUser);
-
-        } catch (NotFoundException ex){
-            log.error("login - " + ex.getMessage());
-
-            res.put("status", HttpStatus.UNAUTHORIZED);
-            res.put("success", Boolean.FALSE);
-            res.put("message", ex.getMessage());
-
-            return ResponseEntity.badRequest()
-                    .body(res);
-        } catch (AuthException ex){
-            log.error("login - " + ex.getMessage());
-
-            res.put("status", HttpStatus.UNAUTHORIZED);
-            res.put("success", Boolean.FALSE);
-            res.put("message", ex.getMessage());
-
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        log.info("login - " + validatedUserDTO.toString());
-
-        res.put("success", Boolean.TRUE);
-        res.put("status", HttpStatus.OK);
-        res.put("data", validatedUserDTO);
-        return ResponseEntity.ok(res);
+        UserDTO userValid = this.service.validate(userPrivate);
+        log.info("login - " + userValid.toString());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", userValid));
     }
-
 
 
     /**
@@ -250,38 +112,14 @@ public class UserPrivateController {
             @PathVariable Integer id,
             @Valid @RequestBody UserPrivate userPrivate
     ) {
-        //CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivateDTO updatedDTO;
-
-        try {
-            // FIND & SET
-            UserPrivate userToUpdate = this.service.findById(id);
-            userPrivate.setSalt(userToUpdate.getSalt());
-            userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
-            userPrivate.setUser(userToUpdate.getUser());
-            // SAVE & MAP
-            UserPrivate updated = this.service.save(userPrivate);
-            updatedDTO = userPrivateMapper.entityToDto(updated);
-
-            // ERROR
-        } catch (NotFoundException ex){
-            log.error("updatePrivateUser - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
+        UserPrivateDTO updatedDTO = this.service.save(userPrivate, id);
         log.info("updatePrivateUser - " + updatedDTO.toString());
-        res.put("status", HttpStatus.ACCEPTED);
-        res.put("success", Boolean.TRUE);
-        res.put("data", updatedDTO);
-        return ResponseEntity.ok(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", updatedDTO));
     }
-
 
 
     @PatchMapping("/{id}")
@@ -289,36 +127,14 @@ public class UserPrivateController {
             @PathVariable Integer id,
             @Valid @RequestBody UserEmailUpdate userEmailUpdate
     ) {
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivateDTO updatedDTO;
-
-        try {
-            // FIND & SET
-            UserPrivate userToUpdate = this.service.findById(id);
-            userToUpdate.setMail(userEmailUpdate.getMail());
-            // SAVE & MAP
-            UserPrivate updated = this.service.save(userToUpdate);
-            updatedDTO = userPrivateMapper.entityToDto(updated);
-
-            // ERROR
-        } catch (NotFoundException ex){
-            log.error("updateUserEmail - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
+        UserPrivateDTO updatedDTO = this.service.save(userEmailUpdate, id);
         log.info("updateUserEmail - " + updatedDTO.toString());
-        res.put("status", HttpStatus.ACCEPTED);
-        res.put("success", Boolean.TRUE);
-        res.put("data", updatedDTO);
-        return ResponseEntity.ok(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of(
+                        "success", true,
+                        "data", updatedDTO));
     }
-
 
 
     /**
@@ -330,30 +146,11 @@ public class UserPrivateController {
     public ResponseEntity<?> deleteUserPrivate(
             @PathVariable Integer id
     ) {
-        // CONSTANT OBJECTS
-        Map<String, Object> res = new HashMap<>();
-        UserPrivate userPrivate;
-
-        try {
-            // FIND & DELETE
-            userPrivate = this.service.findById(id);
-            this.service.delete(userPrivate);
-
-            // ERROR
-        } catch (NotFoundException ex){
-            log.error("deleteUserPrivate - " + ex.getMessage());
-            res.put("status", HttpStatus.BAD_REQUEST);
-            res.put("success", Boolean.FALSE);
-            res.put("mensaje", ex.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(res);
-        }
-
-        // SUCCESS
+        this.service.delete(id);
         log.info("deleteUserPrivate - " + id);
-        res.put("success", Boolean.TRUE);
-        res.put("status", HttpStatus.OK);
-        return ResponseEntity.ok(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(Map.of("success", true));
     }
 
 }

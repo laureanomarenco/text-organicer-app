@@ -1,15 +1,20 @@
 package com.textorganicer.servicios;
 
 import com.textorganicer.negocio.dominios.UserPrivate;
+import com.textorganicer.negocio.dto.UserDTO;
+import com.textorganicer.negocio.dto.UserEmailUpdate;
+import com.textorganicer.negocio.dto.UserPrivateDTO;
 
 import java.util.List;
 
 public interface UserPrivateService {
-    List<UserPrivate> getAll();
-    UserPrivate findById(Integer id);
+    List<UserPrivateDTO> getAll();
+    UserPrivateDTO findById(Integer id);
     UserPrivate findByMail(String mail);
-    UserPrivate save(UserPrivate userPrivate);
-    void delete(UserPrivate userPrivate);
-    boolean validate(UserPrivate userToValidate, UserPrivate userInDB);
+    UserPrivateDTO save(Integer idUser, UserPrivate userPrivate);
+    UserPrivateDTO save(UserPrivate userPrivate, Integer idToUpdate);
+    UserPrivateDTO save(UserEmailUpdate userPrivate, Integer idToUpdate);
+    void delete(Integer id);
+    UserDTO validate(UserPrivate userToValidate);
     boolean exists(String mail);
 }
