@@ -3,6 +3,7 @@ package com.textorganicer.excepciones;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -42,10 +43,20 @@ public class ConfigExceptionHandler {
 
         res.put("status", HttpStatus.UNAUTHORIZED);
         res.put("success", Boolean.FALSE);
-        res.put("message", a.getMessage());
+        res.put("mensaje", a.getMessage());
 
         log.error("AuthError - ", a.getMessage());
         return ResponseEntity.badRequest()
                 .body(res);
+    }
+
+    // Validators Exceptions
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> argumentNotValidationRequest(HttpServletRequest request, MethodArgumentNotValidException e){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "success", Boolean.FALSE,
+                        "mensaje", e.getFieldError().getDefaultMessage()));
     }
 }

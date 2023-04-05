@@ -58,3 +58,6 @@
 05/abr./2023 11:13:37 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Initializing Servlet 'dispatcherServlet'
 05/abr./2023 11:13:37 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Completed initialization in 1 ms
 05/abr./2023 11:14:20 INFO com.textorganicer.controlador.UserPrivateController [http-nio-8080-exec-7] login - UserDTO(id=1, username=Laureano, imagen=null, token=ebfe5a0f-1b97-457f-ae56-518b5c052eb0, folders=[FolderDTO(id=1, nombre=TextOrganicer DOC, is_public=true, id_user=1), FolderDTO(id=3, nombre=Editor de textos, is_public=true, id_user=1), FolderDTO(id=4, nombre=Shortcuts, is_public=false, id_user=1), FolderDTO(id=5, nombre=Cancionero, is_public=true, id_user=1)])
+05/abr./2023 11:21:45 INFO org.springframework.orm.jpa.AbstractEntityManagerFactoryBean [SpringApplicationShutdownHook] Closing JPA EntityManagerFactory for persistence unit 'default'
+05/abr./2023 11:21:45 INFO com.zaxxer.hikari.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown initiated...
+05/abr./2023 11:21:45 INFO com.zaxxer.hikari.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown completed.
