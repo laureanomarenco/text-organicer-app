@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,42 +36,64 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
     @Override
     public List<UserPrivateDTO> getAll() {
-        return this.repository
-                .findAll()
-                .stream()
-                .map(mapper::entityToDto)
-                .collect(Collectors.toList());
+        List<UserPrivateDTO> all;
+        try {
+            all = repository
+                    .findAll()
+                    .stream()
+                    .map(mapper::entityToDto)
+                    .collect(Collectors.toList());
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return all;
     }
 
     @Override
     public UserPrivateDTO findById(Integer id) {
-        return mapper.entityToDto(this.repository
-                .findById(id)
-                .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
+        UserPrivateDTO byId;
+        try {
+            byId = mapper.entityToDto(repository
+                    .findById(id)
+                    .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return byId;
     }
 
     @Override
+    @Transactional
     public UserPrivateDTO save(Integer idUser, UserPrivate userPrivate) {
-        if(this.exists(userPrivate.getMail()))
+        if(exists(userPrivate.getMail()))
             throw new NotFoundException("Ya existe un usuario con ese mail");
 
-        User user = this.userService.findById(idUser);
+        UserPrivateDTO saved;
+        try {
+            User user = userService.findById(idUser);
 
-        byte[] salt = SaltGenerator.generateSalt();
-        userPrivate.setSalt(salt);
-        String hashedPassword = HashGenerator.hashPassword(userPrivate.getPassword(), salt);
-        userPrivate.setPassword(hashedPassword);
+            byte[] salt = SaltGenerator.generateSalt();
+            userPrivate.setSalt(salt);
+            String hashedPassword = HashGenerator.hashPassword(userPrivate.getPassword(), salt);
+            userPrivate.setPassword(hashedPassword);
 
-        userPrivate.setUser(user);
+            userPrivate.setUser(user);
 
-        UserPrivateDTO newUserPrivateDTO = mapper.entityToDto(this.repository.save(userPrivate));
-        log.info("postUserPrivate - " + newUserPrivateDTO.toString());
-        return mapper.entityToDto(this.repository.save(userPrivate));
+            saved = mapper.entityToDto(repository.save(userPrivate));
+        } catch (RuntimeException ex) {
+            log.error("postUserPrivate - " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
+        log.info("postUserPrivate - " + saved.toString());
+        return saved;
     }
 
     @Override
+    @Transactional
     public UserPrivateDTO save(UserPrivate userPrivate, Integer idToUpdate) {
-        UserPrivate userToUpdate = this.repository
+        UserPrivateDTO updaterUserDTO;
+        try {
+        UserPrivate userToUpdate = repository
                 .findById(idToUpdate)
                 .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
 
@@ -78,37 +101,54 @@ public class UserPrivateServiceImpl implements UserPrivateService {
         userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
         userPrivate.setUser(userToUpdate.getUser());
 
-        UserPrivateDTO updaterUserDTO = mapper.entityToDto(this.repository.save(userPrivate));
+        updaterUserDTO = mapper.entityToDto(repository.save(userPrivate));
+        } catch (RuntimeException ex) {
+            log.error("updatePrivateUser - " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
         log.info("updatePrivateUser - " + updaterUserDTO.toString());
         return updaterUserDTO;
     }
 
     @Override
+    @Transactional
     public UserPrivateDTO save(UserEmailUpdate userPrivate, Integer idToUpdate) {
-        UserPrivate userToUpdate = this.repository
+        UserPrivateDTO updatedDTO;
+        try {
+        UserPrivate userToUpdate = repository
                 .findById(idToUpdate)
                 .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
 
         userToUpdate.setMail(userPrivate.getMail());
-        UserPrivateDTO updatedDTO = mapper.entityToDto(this.repository
+        updatedDTO = mapper.entityToDto(repository
                 .save(userToUpdate));
+        } catch (RuntimeException ex) {
+            log.info("updateUserEmail - " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
         log.info("updateUserEmail - " + updatedDTO.toString());
         return updatedDTO;
     }
 
     @Override
     public boolean delete(Integer id) {
-        this.repository.delete(this.repository
+        try {
+        repository.delete(this.repository
                 .findById(id)
                 .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
-
+        } catch (RuntimeException ex) {
+            log.info("deleteUserPrivate - " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
         log.info("deleteUserPrivate - " + id);
         return true;
     }
 
     @Override
     public UserDTO validate(UserPrivate userToValidate) {
-        UserPrivate userInDB = this.findByMail(userToValidate.getMail());
+        UserDTO userValidDTO;
+        try {
+        UserPrivate userInDB = findByMail(userToValidate.getMail());
 
         boolean isValid = HashGenerator.verifyPassword(
                 userToValidate.getPassword(),
@@ -123,20 +163,36 @@ public class UserPrivateServiceImpl implements UserPrivateService {
         LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
         userValid.setTokenExpiration(expirationDate);
 
-        UserDTO userValidDTO = userMapper.entityToDto(this.userService.save(userValid));
-
+        userValidDTO = userMapper.entityToDto(this.userService.save(userValid));
+        } catch (RuntimeException ex) {
+            log.info("login - " + ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        }
         log.info("login - " + userValidDTO.toString());
         return userValidDTO;
     }
 
     @Override
     public boolean exists(String mail) {
-        return this.repository.findByMail(mail).isPresent();
+        boolean existsByMail;
+        try {
+            existsByMail = repository.findByMail(mail).isPresent();
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return existsByMail;
     }
 
+    @Override
     public UserPrivate findByMail(String mail) {
-        return this.repository
-                .findByMail(mail)
-                .orElseThrow(() -> new NotFoundException("Mail no encontrado"));
+        UserPrivate userByMail;
+        try {
+            userByMail = repository
+                    .findByMail(mail)
+                    .orElseThrow(() -> new NotFoundException("Mail no encontrado"));
+        } catch (RuntimeException ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+        return userByMail;
     }
 }
