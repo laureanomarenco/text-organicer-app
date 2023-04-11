@@ -15,6 +15,15 @@ import java.util.Map;
 @Slf4j
 @ControllerAdvice
 public class ConfigExceptionHandler {
+    /* 500 */
+    @ExceptionHandler(ErrorProcessException.class)
+    public ResponseEntity<?> handleEnteredDataConflict(HttpServletRequest request,
+                                                       ErrorProcessException e){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                        "success", Boolean.FALSE,
+                        "mensaje", e.getMessage()));
+    }
 
     // Not Found Exception
     @ExceptionHandler(NotFoundException.class)

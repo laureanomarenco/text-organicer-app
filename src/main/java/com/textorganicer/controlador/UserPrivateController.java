@@ -1,9 +1,8 @@
 package com.textorganicer.controlador;
 
+import com.textorganicer.excepciones.ErrorProcessException;
 import com.textorganicer.negocio.dominios.UserPrivate;
-import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserEmailUpdate;
-import com.textorganicer.negocio.dto.UserPrivateDTO;
 
 import com.textorganicer.servicios.UserPrivateService;
 
@@ -35,7 +34,7 @@ public class UserPrivateController {
      * @return List<UserPrivateDTO>
      */
     @GetMapping
-    public ResponseEntity<?> getAllUsersPrivate() {
+    public ResponseEntity<?> getAllUsersPrivate() throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
@@ -52,7 +51,7 @@ public class UserPrivateController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserPrivateById(
             @PathVariable Integer id
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
@@ -71,7 +70,7 @@ public class UserPrivateController {
     public ResponseEntity<?> newUserPrivate(
             @Valid @RequestBody UserPrivate userPrivate,
             @PathVariable Integer user_id
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
@@ -88,12 +87,12 @@ public class UserPrivateController {
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @Valid @RequestBody UserPrivate userPrivate
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", this.service.validate(userPrivate)));
+                        "data", service.validate(userPrivate)));
     }
 
 
@@ -107,12 +106,12 @@ public class UserPrivateController {
     public ResponseEntity<?> updateUserPrivate(
             @PathVariable Integer id,
             @Valid @RequestBody UserPrivate userPrivate
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", this.service.save(userPrivate, id)));
+                        "data", service.save(userPrivate, id)));
     }
 
 
@@ -120,12 +119,12 @@ public class UserPrivateController {
     public ResponseEntity<?> updateUserEmail(
             @PathVariable Integer id,
             @Valid @RequestBody UserEmailUpdate userEmailUpdate
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(Map.of(
                         "success", true,
-                        "data", this.service.save(userEmailUpdate, id)));
+                        "data", service.save(userEmailUpdate, id)));
     }
 
 
@@ -137,10 +136,10 @@ public class UserPrivateController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUserPrivate(
             @PathVariable Integer id
-    ) {
+    ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of("success", this.service.delete(id)));
+                .body(Map.of("success", service.delete(id)));
     }
 
 }
