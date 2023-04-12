@@ -17,12 +17,12 @@ import java.util.Map;
 public class ConfigExceptionHandler {
     /* 500 */
     @ExceptionHandler(ErrorProcessException.class)
-    public ResponseEntity<?> handleEnteredDataConflict(HttpServletRequest request,
-                                                       ErrorProcessException e){
+    public ResponseEntity<?> handleEnteredDataConflict(
+            HttpServletRequest request,
+            ErrorProcessException e
+    ){
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                        "success", Boolean.FALSE,
-                        "mensaje", e.getMessage()));
+                .body(e.getMessage());
     }
 
     // Not Found Exception
@@ -31,16 +31,9 @@ public class ConfigExceptionHandler {
             HttpServletRequest request,
             NotFoundException e
     ) {
-        Map<String, Object> res = new HashMap<>();
-
-        res.put("success", Boolean.FALSE);
-        res.put("status", HttpStatus.BAD_REQUEST);
-        res.put("mensaje", e.getMessage());
         return ResponseEntity.badRequest()
-                .body(res);
+                .body(e.getMessage());
     }
-
-
 
     // Auth Exception
     @ExceptionHandler(AuthException.class)
@@ -48,15 +41,9 @@ public class ConfigExceptionHandler {
             HttpServletRequest request,
             AuthException a
     ) {
-        Map<String, Object> res = new HashMap<>();
-
-        res.put("status", HttpStatus.UNAUTHORIZED);
-        res.put("success", Boolean.FALSE);
-        res.put("mensaje", a.getMessage());
-
         log.error("AuthError - ", a.getMessage());
-        return ResponseEntity.badRequest()
-                .body(res);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(a.getMessage());
     }
 
     // Validators Exceptions
@@ -64,8 +51,6 @@ public class ConfigExceptionHandler {
     public ResponseEntity<?> argumentNotValidationRequest(HttpServletRequest request, MethodArgumentNotValidException e){
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "success", Boolean.FALSE,
-                        "mensaje", e.getFieldError().getDefaultMessage()));
+                .body(e.getFieldError().getDefaultMessage());
     }
 }

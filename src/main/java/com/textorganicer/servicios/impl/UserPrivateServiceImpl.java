@@ -8,9 +8,9 @@ import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserDTO;
 import com.textorganicer.negocio.dto.UserEmailUpdate;
 import com.textorganicer.negocio.dto.UserPrivateDTO;
-import com.textorganicer.negocio.dto.mapper.UserMapper;
 import com.textorganicer.negocio.dto.mapper.UserPrivateMapper;
 import com.textorganicer.respositorios.UserPrivateRepository;
+import com.textorganicer.respositorios.UserRepository;
 import com.textorganicer.servicios.UserPrivateService;
 import com.textorganicer.servicios.UserService;
 import com.textorganicer.utils.HashGenerator;
@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,8 +30,8 @@ import java.util.stream.Collectors;
 public class UserPrivateServiceImpl implements UserPrivateService {
     private final UserPrivateRepository repository;
     private final UserPrivateMapper mapper;
-    private final UserMapper userMapper;
     private final UserService userService;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -51,23 +50,23 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
     @Override
     public UserPrivateDTO findById(Integer id) throws ErrorProcessException {
+        UserPrivate userById = repository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
         try {
-            return mapper.entityToDto(repository
-                    .findById(id)
-                    .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
+            return mapper.entityToDto(userById);
         } catch (RuntimeException ex) {
             throw new ErrorProcessException(ex.getMessage());
         }
     }
 
     @Override
-    @Transactional
     public UserPrivateDTO save(Integer idUser, UserPrivate userPrivate) throws ErrorProcessException {
+        if(exists(userPrivate.getMail())) throw new NotFoundException("Ya existe un usuario con ese mail");
+        User user = userRepository
+                .findById(idUser)
+                .orElseThrow(() -> new NotFoundException("El usuario no existe"));
         try {
-            if(exists(userPrivate.getMail()))
-                throw new NotFoundException("Ya existe un usuario con ese mail");
-
-            User user = userService.findById(idUser);
 
             byte[] salt = SaltGenerator.generateSalt();
             userPrivate.setSalt(salt);
@@ -86,13 +85,11 @@ public class UserPrivateServiceImpl implements UserPrivateService {
     }
 
     @Override
-    @Transactional
-    public UserPrivateDTO save(UserPrivate userPrivate, Integer idToUpdate) throws ErrorProcessException {
+    public UserPrivateDTO update(UserPrivate userPrivate, Integer idToUpdate) throws ErrorProcessException {
+        UserPrivate userToUpdate = repository
+                .findById(idToUpdate)
+                .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
         try {
-            UserPrivate userToUpdate = repository
-                    .findById(idToUpdate)
-                    .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
-
             userPrivate.setSalt(userToUpdate.getSalt());
             userPrivate.setPassword(HashGenerator.hashPassword(userPrivate.getPassword(), userToUpdate.getSalt()));
             userPrivate.setUser(userToUpdate.getUser());
@@ -108,13 +105,12 @@ public class UserPrivateServiceImpl implements UserPrivateService {
     }
 
     @Override
-    @Transactional
-    public UserPrivateDTO save(UserEmailUpdate userPrivate, Integer idToUpdate) throws ErrorProcessException {
-        try {
-            UserPrivate userToUpdate = repository
-                    .findById(idToUpdate)
-                    .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
+    public UserPrivateDTO updateEmail(UserEmailUpdate userPrivate, Integer idToUpdate) throws ErrorProcessException {
+        UserPrivate userToUpdate = repository
+                .findById(idToUpdate)
+                .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
 
+        try {
             userToUpdate.setMail(userPrivate.getMail());
             UserPrivateDTO updatedDTO = mapper.entityToDto(repository
                     .save(userToUpdate));
@@ -123,7 +119,7 @@ public class UserPrivateServiceImpl implements UserPrivateService {
             return updatedDTO;
 
         } catch (RuntimeException ex) {
-            log.info("updateUserEmail - " + ex.getMessage());
+            log.error("updateUserEmail - " + ex.getMessage());
             throw new ErrorProcessException(ex.getMessage());
         }
 
@@ -131,30 +127,30 @@ public class UserPrivateServiceImpl implements UserPrivateService {
 
     @Override
     public boolean delete(Integer id) throws ErrorProcessException {
+        UserPrivate userToDelete = this.repository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id"));
         try {
-            repository.delete(this.repository
-                    .findById(id)
-                    .orElseThrow(() -> new NotFoundException("No hay ningún usuario con ese id")));
-
+            repository.delete(userToDelete);
             log.info("deleteUserPrivate - " + id);
             return true;
         } catch (RuntimeException ex) {
-            log.info("deleteUserPrivate - " + ex.getMessage());
+            log.error("deleteUserPrivate - " + ex.getMessage());
             throw new ErrorProcessException(ex.getMessage());
         }
     }
 
     @Override
     public UserDTO validate(UserPrivate userToValidate) throws ErrorProcessException {
+        UserPrivate userInDB = findByMail(userToValidate.getMail());
+
+        boolean isValid = HashGenerator.verifyPassword(
+                userToValidate.getPassword(),
+                userInDB.getSalt(),
+                userInDB.getPassword());
+
+        if(!isValid) throw new AuthException("Password incorrecto");
         try {
-            UserPrivate userInDB = findByMail(userToValidate.getMail());
-
-            boolean isValid = HashGenerator.verifyPassword(
-                    userToValidate.getPassword(),
-                    userInDB.getSalt(),
-                    userInDB.getPassword());
-
-            if(!isValid) throw new AuthException("Password incorrecto");
             User userValid = userInDB.getUser();
             String token = TokenGenerator.generateToken();
             userValid.setToken(token);
@@ -162,12 +158,12 @@ public class UserPrivateServiceImpl implements UserPrivateService {
             LocalDateTime expirationDate = LocalDateTime.now().plusHours(10);
             userValid.setTokenExpiration(expirationDate);
 
-            UserDTO userValidDTO = userMapper.entityToDto(this.userService.save(userValid));
+            UserDTO userValidDTO = userService.save(userValid);
 
             log.info("login - " + userValidDTO.toString());
             return userValidDTO;
         } catch (RuntimeException ex) {
-            log.info("login - " + ex.getMessage());
+            log.error("login - " + ex.getMessage());
             throw new ErrorProcessException(ex.getMessage());
         }
 
@@ -183,13 +179,9 @@ public class UserPrivateServiceImpl implements UserPrivateService {
     }
 
     @Override
-    public UserPrivate findByMail(String mail) throws ErrorProcessException {
-        try {
-            return repository
-                    .findByMail(mail)
-                    .orElseThrow(() -> new NotFoundException("Mail no encontrado"));
-        } catch (RuntimeException ex) {
-            throw new ErrorProcessException(ex.getMessage());
-        }
+    public UserPrivate findByMail(String mail) {
+        return repository
+                .findByMail(mail)
+                .orElseThrow(() -> new NotFoundException("Mail no encontrado"));
     }
 }

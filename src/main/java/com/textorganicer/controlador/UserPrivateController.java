@@ -3,18 +3,15 @@ package com.textorganicer.controlador;
 import com.textorganicer.excepciones.ErrorProcessException;
 import com.textorganicer.negocio.dominios.UserPrivate;
 import com.textorganicer.negocio.dto.UserEmailUpdate;
-
 import com.textorganicer.servicios.UserPrivateService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Map;
 
 
 /**
@@ -37,9 +34,7 @@ public class UserPrivateController {
     public ResponseEntity<?> getAllUsersPrivate() throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.getAll()));
+                .body(service.getAll());
     }
 
 
@@ -54,9 +49,7 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.findById(id)));
+                .body(service.findById(id));
     }
 
 
@@ -73,9 +66,7 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.save(user_id, userPrivate)));
+                .body(service.save(user_id, userPrivate));
     }
 
 
@@ -90,9 +81,7 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.validate(userPrivate)));
+                .body(service.validate(userPrivate));
     }
 
 
@@ -109,9 +98,7 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.save(userPrivate, id)));
+                .body(service.update(userPrivate, id));
     }
 
 
@@ -122,9 +109,7 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of(
-                        "success", true,
-                        "data", service.save(userEmailUpdate, id)));
+                .body(service.updateEmail(userEmailUpdate, id));
     }
 
 
@@ -139,7 +124,6 @@ public class UserPrivateController {
     ) throws ErrorProcessException {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Map.of("success", service.delete(id)));
+                .body(service.delete(id));
     }
-
 }
